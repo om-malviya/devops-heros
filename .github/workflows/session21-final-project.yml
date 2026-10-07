@@ -1,0 +1,234 @@
+name: Session 21 Final Project CI/CD
+
+# Pipeline: lint+test -> build frontend -> SAST/SCA/secret scan -> docker build + Trivy gate -> push GHCR -> Helm deploy
+on:
+  push:
+    branches: [main]
+    paths:
+      - "homework/session21-final-devops-project/**"
+      - ".github/workflows/session21-final-project.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "homework/session21-final-devops-project/**"
+      - ".github/workflows/session21-final-project.yml"
+  workflow_dispatch:
+
+env:
+  PROJECT_DIR: homework/session21-final-devops-project
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/taskboard-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+
+defaults:
+  run:
+    working-directory: homework/session21-final-devops-project
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------- 1. Build & Test
+  backend-lint-test:
+    name: Backend lint + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/application/backend/requirements*.txt
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}/application/backend
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Lint (ruff)
+        working-directory: ${{ env.PROJECT_DIR }}/application/backend
+        run: ruff check app tests
+      - name: Run tests (SQLite, see tests/conftest.py)
+        working-directory: ${{ env.PROJECT_DIR }}/application/backend
+        run: pytest -v --junitxml=pytest-report.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: ${{ env.PROJECT_DIR }}/application/backend/pytest-report.xml
+
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install and build
+        working-directory: ${{ env.PROJECT_DIR }}/application/frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.PROJECT_DIR }}/application/frontend/dist
+
+  # ---------------------------------------------------------------- 2. Security scanning (DevSecOps gates)
+  sast:
+    name: SAST (bandit + semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Bandit
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          pip install bandit==1.8.0
+          bandit -c security/bandit.yaml -r application/backend/app -f txt
+      - name: Semgrep
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          pip install semgrep
+          semgrep scan --config p/python --config p/owasp-top-ten --config security/semgrep.yml             --error --severity ERROR --severity WARNING application/backend application/frontend/src
+
+  sca:
+    name: SCA (pip-audit + npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: pip-audit (fails on any known vulnerability)
+        working-directory: ${{ env.PROJECT_DIR }}/application/backend
+        run: |
+          pip install pip-audit==2.7.3
+          pip-audit -r requirements.txt --strict
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: npm audit (fails on high/critical)
+        working-directory: ${{ env.PROJECT_DIR }}/application/frontend
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          npm audit --audit-level=high
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # scan full history
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ env.PROJECT_DIR }}/security/.gitleaks.toml
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+
+  # ---------------------------------------------------------------- 3. Docker build, image scan gate, push
+  docker-build-scan-push:
+    name: Docker build + Trivy gate + push
+    needs: [backend-lint-test, frontend-build, sast, sca, secret-scan]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend image
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: docker build -f docker/backend.Dockerfile -t "$BACKEND_IMAGE:${{ github.sha }}" application/backend
+      - name: Build frontend image
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: docker build -f docker/frontend.Dockerfile -t "$FRONTEND_IMAGE:${{ github.sha }}" application/frontend
+
+      - name: "Trivy scan backend (gate: HIGH/CRITICAL fixable CVEs fail the job)"
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
+          trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
+          format: table
+          exit-code: "1"
+      - name: Trivy scan frontend
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
+          trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
+          format: table
+          exit-code: "1"
+      - name: Trivy SARIF report (backend) for the Security tab
+        if: always()
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
+          format: sarif
+          output: trivy-backend.sarif
+          exit-code: "0"
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: trivy-backend.sarif
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push images (tag = git SHA, plus latest on main)
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push "$BACKEND_IMAGE:${{ github.sha }}"
+          docker push "$FRONTEND_IMAGE:${{ github.sha }}"
+          docker tag "$BACKEND_IMAGE:${{ github.sha }}"  "$BACKEND_IMAGE:latest"
+          docker tag "$FRONTEND_IMAGE:${{ github.sha }}" "$FRONTEND_IMAGE:latest"
+          docker push "$BACKEND_IMAGE:latest"
+          docker push "$FRONTEND_IMAGE:latest"
+
+  # ---------------------------------------------------------------- 4. Deploy (only when a kubeconfig secret is configured)
+  deploy:
+    name: Helm deploy
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: docker-build-scan-push
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      HAS_KUBECONFIG: ${{ secrets.KUBE_CONFIG_DATA != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip notice
+        if: env.HAS_KUBECONFIG != 'true'
+        run: echo "KUBE_CONFIG_DATA secret not set - skipping deployment (GitOps/Argo CD can take over instead)."
+      - uses: azure/setup-helm@v4
+        if: env.HAS_KUBECONFIG == 'true'
+      - name: Configure kubectl
+        if: env.HAS_KUBECONFIG == 'true'
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+      - name: helm lint
+        if: env.HAS_KUBECONFIG == 'true'
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: helm lint helm/taskboard -f helm/taskboard/values-dev.yaml
+      - name: helm upgrade --install
+        if: env.HAS_KUBECONFIG == 'true'
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          helm upgrade --install taskboard helm/taskboard             --namespace taskboard --create-namespace             -f helm/taskboard/values-dev.yaml             --set backend.image.repository="$BACKEND_IMAGE"             --set backend.image.tag="${{ github.sha }}"             --set frontend.image.repository="$FRONTEND_IMAGE"             --set frontend.image.tag="${{ github.sha }}"             --wait --timeout 5m
+          kubectl -n taskboard rollout status deployment/taskboard-taskboard-backend
+          kubectl -n taskboard get pods,svc,ingress,hpa

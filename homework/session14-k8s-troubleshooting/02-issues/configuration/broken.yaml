@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: s14
+data:
+  DB_HOST: "db.s14.svc.cluster.local"
+  # NOTE: there is no DB_PORT key here
+---
+# BUG 1: env var references key DB_PORT which does not exist in the ConfigMap.
+# BUG 2: env var references Secret app-secret which does not exist at all.
+# Result: CreateContainerConfigError (kubelet cannot build the container config).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-demo
+  namespace: s14
+  labels:
+    app: config-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["sh", "-c", "echo DB=$DB_HOST:$DB_PORT user=$DB_USER; sleep 3600"]
+      env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: username

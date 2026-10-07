@@ -1,0 +1,10 @@
+# Step 5 of the project: the image tag does not exist.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: project-broken-pod
+  namespace: s14
+spec:
+  containers:
+    - name: app
+      image: nginx:this-tag-does-not-exist

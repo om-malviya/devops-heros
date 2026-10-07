@@ -1,0 +1,7 @@
+line-length = 140
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W", "I", "B"]
+# B008: `Depends(get_db)` in argument defaults is the idiomatic FastAPI dependency injection pattern.
+ignore = ["B008"]

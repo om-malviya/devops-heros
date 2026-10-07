@@ -1,0 +1,14 @@
+# FIX: use a tag that exists.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-demo
+  namespace: s14
+  labels:
+    app: image-demo
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      ports:
+        - containerPort: 80

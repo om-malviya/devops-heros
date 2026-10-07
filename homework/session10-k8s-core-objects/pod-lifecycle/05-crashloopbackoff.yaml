@@ -1,0 +1,15 @@
+# Container exits 1 after 3 s. Default restartPolicy Always makes the kubelet
+# restart it with exponential backoff (10s, 20s, 40s ... max 5m):
+# STATUS cycles Running -> Error -> CrashLoopBackOff.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-crashloop
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  containers:
+    - name: crashing-app
+      image: busybox:1.36
+      command: ["sh", "-c", "echo 'Application started'; sleep 3; echo 'Application crashed'; exit 1"]

@@ -1,0 +1,45 @@
+# Custom Semgrep (SAST) rules for this project. In the pipeline they are combined with the
+# community rulesets:  semgrep scan --config p/python --config p/flask --config security/semgrep.yml
+rules:
+  - id: no-eval-or-exec
+    message: Do not use eval()/exec() on data that may come from a request
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+    metadata:
+      cwe: "CWE-95: Eval Injection"
+      category: security
+
+  - id: flask-debug-enabled
+    message: Flask debug mode exposes the Werkzeug debugger (remote code execution) - never enable it
+    severity: ERROR
+    languages: [python]
+    pattern: $APP.run(..., debug=True, ...)
+    metadata:
+      cwe: "CWE-489: Active Debug Code"
+      category: security
+
+  - id: subprocess-shell-true
+    message: subprocess with shell=True enables command injection
+    severity: ERROR
+    languages: [python]
+    pattern: subprocess.$FN(..., shell=True, ...)
+    metadata:
+      cwe: "CWE-78: OS Command Injection"
+      category: security
+
+  - id: hardcoded-secret-assignment
+    message: Possible hardcoded credential - load it from the environment or a secret manager
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: $X = "..."
+      - metavariable-regex:
+          metavariable: $X
+          regex: (?i).*(password|passwd|secret|api_key|apikey|token).*
+    metadata:
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+      category: security

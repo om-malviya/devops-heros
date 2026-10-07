@@ -1,0 +1,26 @@
+# FIX: provide the DB_HOST the application requires.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crash-demo
+  namespace: s14
+  labels:
+    app: crash-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      env:
+        - name: DB_HOST
+          value: "db.s14.svc.cluster.local"
+      command:
+        - sh
+        - -c
+        - |
+          echo "Application starting..."
+          if [ -z "$DB_HOST" ]; then
+            echo "FATAL: DB_HOST environment variable is missing" >&2
+            exit 1
+          fi
+          echo "Connected to $DB_HOST"
+          while true; do echo "Application is healthy"; sleep 10; done

@@ -1,0 +1,21 @@
+# nginx starts instantly but the readiness probe only begins after 10 s, so
+# the Pod is Running but 0/1 READY for a while. Running != Ready.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-readiness
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 10
+        periodSeconds: 5

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: s14
+data:
+  DB_HOST: "db.s14.svc.cluster.local"
+  # FIX 1: the missing key is added
+  DB_PORT: "5432"
+---
+# FIX 2: the Secret the Pod references now exists (placeholder values only).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: s14
+type: Opaque
+stringData:
+  username: "app_user"
+  password: "fake-password-change-me"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-demo
+  namespace: s14
+  labels:
+    app: config-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["sh", "-c", "echo DB=$DB_HOST:$DB_PORT user=$DB_USER; sleep 3600"]
+      env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: username

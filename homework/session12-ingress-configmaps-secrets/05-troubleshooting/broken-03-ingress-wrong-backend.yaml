@@ -1,0 +1,30 @@
+# SCENARIO 3 (BROKEN): Ingress points at a Service name that does not exist ("app1-svc", the real
+# Service is "app1") and at port 8080 (the real Service port is 80).
+# Symptom: Ingress is accepted by the API server, but curl returns 503/404 and
+# `kubectl describe ingress` shows  <error: services "app1-svc" not found>.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ts-ingress
+  namespace: s12
+  labels:
+    scenario: "3"
+spec:
+  rules:
+    - host: ts.demo.local
+      http:
+        paths:
+          - path: /app1
+            pathType: Prefix
+            backend:
+              service:
+                name: app1-svc     # <-- BUG 1: Service is called "app1"
+                port:
+                  number: 8080     # <-- BUG 2: Service listens on port 80
+          - path: /app2
+            pathType: Prefix
+            backend:
+              service:
+                name: app2
+                port:
+                  number: 80

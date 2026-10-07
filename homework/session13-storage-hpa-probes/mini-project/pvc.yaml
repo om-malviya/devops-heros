@@ -1,0 +1,13 @@
+# 500Mi ReadWriteOnce claim. No storageClassName -> the cluster default class is used:
+# k3s "local-path" (WaitForFirstConsumer: stays Pending until a Pod mounts it) / minikube "standard".
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-data
+  namespace: production-webapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

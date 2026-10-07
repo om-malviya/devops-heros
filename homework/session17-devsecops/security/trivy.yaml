@@ -1,0 +1,23 @@
+# Trivy configuration shared by the filesystem (SCA) scan and the image scan.
+# Local:  trivy --config security/trivy.yaml fs .
+#         trivy --config security/trivy.yaml image session17-devsecops-api:local
+severity:
+  - CRITICAL
+  - HIGH
+exit-code: 1          # fail the step when a finding matches the severity filter (this is the gate)
+# `ignore-unfixed` must live under the `vulnerability:` section - at the top level Trivy
+# silently ignores it and the gate fails on CVEs that have no fix yet (found 2026-10-07).
+vulnerability:
+  ignore-unfixed: true  # do not block on CVEs that have no fix available yet
+ignorefile: security/.trivyignore
+scan:
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+  skip-dirs:
+    - .venv
+    - venv
+    - build
+    - dist
+timeout: 10m

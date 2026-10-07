@@ -1,0 +1,31 @@
+# BUG 1: resource requests far larger than any node can offer.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pending-cpu
+  namespace: s14
+  labels:
+    app: pending-cpu
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      resources:
+        requests:
+          cpu: "64"
+          memory: "512Gi"
+---
+# BUG 2: nodeSelector asks for a label that no node has.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pending-selector
+  namespace: s14
+  labels:
+    app: pending-selector
+spec:
+  nodeSelector:
+    disktype: nvme-does-not-exist
+  containers:
+    - name: web
+      image: nginx:alpine

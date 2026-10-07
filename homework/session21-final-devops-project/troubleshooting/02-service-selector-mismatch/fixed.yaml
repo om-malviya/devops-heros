@@ -1,0 +1,17 @@
+# FIXED version of scenario 2. Apply with: kubectl apply -f fixed.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-backend
+  namespace: taskboard
+  labels:
+    app: taskboard-backend
+    app.kubernetes.io/part-of: taskboard
+spec:
+  type: ClusterIP
+  selector:
+    app: taskboard-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

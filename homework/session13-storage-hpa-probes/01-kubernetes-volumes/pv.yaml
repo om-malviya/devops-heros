@@ -1,0 +1,18 @@
+# Static provisioning step 1: an admin pre-creates a PersistentVolume (cluster-scoped, no namespace).
+# Backed by a hostPath directory on the node, fine for a single-node k3s / minikube lab.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: s13-static-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual        # a PVC must ask for the same class name to bind to this PV
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain   # keep the data when the PVC is deleted
+  hostPath:
+    path: /tmp/s13-static-pv
+    type: DirectoryOrCreate

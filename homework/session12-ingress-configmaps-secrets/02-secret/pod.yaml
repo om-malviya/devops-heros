@@ -1,0 +1,48 @@
+# Task 2 - Pod that consumes the Secret in both supported ways:
+#   1. as environment variables (secretKeyRef, one key at a time)
+#   2. as files in a read-only volume at /etc/secrets (one file per key)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-demo
+  namespace: s12
+  labels:
+    app: secret-demo
+spec:
+  containers:
+    - name: app
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_NAME
+      volumeMounts:
+        - name: secret-volume
+          mountPath: /etc/secrets
+          readOnly: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+  volumes:
+    - name: secret-volume
+      secret:
+        secretName: db-secret
+        defaultMode: 0400   # owner read-only; files are owned by root inside the container

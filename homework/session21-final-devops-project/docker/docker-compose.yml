@@ -1,0 +1,51 @@
+# Full local stack: PostgreSQL + FastAPI backend + React/nginx frontend.
+# Run from the project root:   docker compose -f docker/docker-compose.yml up --build
+name: taskboard
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: taskboard
+      POSTGRES_USER: taskboard
+      POSTGRES_PASSWORD: taskboard-local-only
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskboard -d taskboard"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../application/backend
+      dockerfile: ../../docker/backend.Dockerfile
+    image: taskboard-backend:local
+    environment:
+      APP_ENV: compose
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql+psycopg://taskboard:taskboard-local-only@postgres:5432/taskboard
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ../application/frontend
+      dockerfile: ../../docker/frontend.Dockerfile
+    image: taskboard-frontend:local
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: "8000"
+    depends_on:
+      - backend
+    ports:
+      - "3000:8080"
+
+volumes:
+  postgres-data:

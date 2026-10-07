@@ -1,0 +1,28 @@
+# Graceful shutdown. On delete the kubelet:
+#   1. runs the preStop hook (5 s here),
+#   2. sends SIGTERM to PID 1 (the trap below does 10 s of "cleanup"),
+#   3. sends SIGKILL if the container is still alive after
+#      terminationGracePeriodSeconds (30 s) counted from the start of step 1.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-termination
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  terminationGracePeriodSeconds: 30
+  containers:
+    - name: graceful-app
+      image: busybox:1.36
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sh", "-c", "echo 'preStop: draining connections'; sleep 5"]
+      command:
+        - sh
+        - -c
+        - |
+          trap 'echo "SIGTERM received; cleaning up..."; sleep 10; echo "Cleanup complete"; exit 0' TERM
+          echo "Application running"
+          while true; do sleep 1; done

@@ -1,0 +1,18 @@
+# Normal case: image pulls, container starts and keeps running.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-running
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi

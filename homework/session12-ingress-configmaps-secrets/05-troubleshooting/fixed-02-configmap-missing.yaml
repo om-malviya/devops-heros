@@ -1,0 +1,17 @@
+# SCENARIO 2 (FIXED): the ConfigMap name matches the one created in ../01-configmap/configmap.yaml.
+# (Alternative fix: create the missing ConfigMap. Or mark the reference optional: true.)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ts-configmap-pod
+  namespace: s12
+  labels:
+    scenario: "2"
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["sh", "-c", "echo \"APP_ENV=$APP_ENV LOG_LEVEL=$LOG_LEVEL\"; sleep 3600"]
+      envFrom:
+        - configMapRef:
+            name: app-config       # FIX: correct ConfigMap name

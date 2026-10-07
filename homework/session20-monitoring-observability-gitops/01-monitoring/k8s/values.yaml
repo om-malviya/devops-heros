@@ -1,0 +1,27 @@
+# Minimal values for kube-prometheus-stack (used by `helm install -f values.yaml`).
+# Keeps the lab small and lets Prometheus pick up ServiceMonitors / PrometheusRules
+# from ANY namespace, not only the ones created by the chart.
+grafana:
+  adminPassword: admin-lab-password   # lab only placeholder
+  service:
+    type: ClusterIP
+
+prometheus:
+  prometheusSpec:
+    retention: 2d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+
+alertmanager:
+  enabled: true
+
+# node-exporter and kube-state-metrics are enabled by default in the chart.
+nodeExporter:
+  enabled: true
+kubeStateMetrics:
+  enabled: true

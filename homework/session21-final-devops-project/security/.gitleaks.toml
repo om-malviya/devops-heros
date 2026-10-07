@@ -1,0 +1,29 @@
+# Gitleaks configuration - secret scanning of the working tree and git history.
+title = "taskboard-gitleaks"
+
+[extend]
+useDefault = true          # keep all built-in rules (AWS keys, GitHub tokens, private keys, ...)
+
+[[rules]]
+id = "taskboard-database-url-with-password"
+description = "PostgreSQL connection string containing a password"
+# Non-capturing group on purpose: Gitleaks reports capture group 1 as the "secret", so a capturing
+# "(\+psycopg)?" would make the secret "+psycopg" and the allow-list below could never match it.
+regex = '''postgresql(?:\+psycopg)?://[A-Za-z0-9_]+:[^@\s'"<]{8,}@'''
+tags = ["database", "password"]
+
+[allowlist]
+description = "Documented demo placeholders"
+regexTarget = "line"      # match the allow-list regexes against the whole line, not only the captured secret
+paths = [
+  '''kubernetes/02-secret\.example\.yaml''',
+  '''terraform/terraform\.tfvars\.example''',
+  '''application/backend/\.env\.example''',
+]
+regexes = [
+  '''changeme-demo-password''',
+  '''taskboard-local-only''',
+  '''<DB_PASSWORD>''',
+  '''<STRONG_PASSWORD>''',
+  '''taskboard:taskboard@localhost''',
+]

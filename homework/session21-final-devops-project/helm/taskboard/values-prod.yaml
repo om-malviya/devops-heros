@@ -1,0 +1,35 @@
+# Production (EKS): more replicas, HPA, TLS ingress, monitoring on, password supplied from an existing Secret.
+backend:
+  replicaCount: 3
+  resources:
+    requests: {cpu: 250m, memory: 256Mi}
+    limits: {cpu: 1000m, memory: 768Mi}
+frontend:
+  replicaCount: 2
+config:
+  appEnv: prod
+  logLevel: warning
+postgres:
+  existingSecret: taskboard-db-credentials   # created out-of-band (External Secrets / kubectl)
+  persistence:
+    size: 20Gi
+    storageClass: gp3
+ingress:
+  enabled: true
+  className: nginx
+  host: taskboard.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    - secretName: taskboard-tls
+      hosts: [taskboard.example.com]
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 65
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true

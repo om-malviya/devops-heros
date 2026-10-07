@@ -1,0 +1,3 @@
+# CVE ids listed here are excluded from the gate. Every entry needs a justification and an expiry.
+# Format:  CVE-XXXX-YYYY   # reason, owner, re-evaluate on YYYY-MM-DD
+# (empty on purpose - no accepted risks at the moment)

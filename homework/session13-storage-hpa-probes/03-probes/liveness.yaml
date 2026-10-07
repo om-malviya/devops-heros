@@ -1,0 +1,20 @@
+# Liveness: "are you still alive?" - failing 3 times in a row restarts the container.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-demo
+  namespace: s13
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      livenessProbe:
+        httpGet:
+          path: /          # change to /wrong-path to watch RESTARTS climb
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 3

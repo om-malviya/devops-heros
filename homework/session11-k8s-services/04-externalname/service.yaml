@@ -1,0 +1,11 @@
+# ExternalName: no selector, no pods, no ClusterIP, no endpoints.
+# CoreDNS answers "external-site.s11.svc.cluster.local" with a CNAME to
+# example.com, so in-cluster code can use a stable internal name.
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-site
+  namespace: s11
+spec:
+  type: ExternalName
+  externalName: example.com

@@ -1,0 +1,13 @@
+# Used when the repository root is the build context (e.g. docker build -f docker/backend.Dockerfile .)
+.git
+.github
+**/node_modules
+**/dist
+**/__pycache__
+**/*.pyc
+**/.venv
+**/.pytest_cache
+**/*.db
+**/.env
+terraform/.terraform
+*.md

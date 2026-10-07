@@ -1,0 +1,30 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: webhook-placeholder
+  group_by: ["alertname", "job"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: webhook-placeholder
+      repeat_interval: 15m
+
+receivers:
+  # Placeholder: point this at a real Slack/Teams/PagerDuty webhook or a tiny
+  # local receiver. For the lab I just read alerts at http://localhost:9093.
+  - name: webhook-placeholder
+    webhook_configs:
+      - url: http://host.docker.internal:5001/alerts   # fake endpoint, nothing listens here
+        send_resolved: true
+
+inhibit_rules:
+  # If a target is down, do not also page about its CPU/memory.
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal: ["instance"]

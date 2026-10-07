@@ -1,0 +1,13 @@
+# Step 8 of the project: intentionally wrong selector (app: wrong-app).
+apiVersion: v1
+kind: Service
+metadata:
+  name: troubleshooting-service
+  namespace: s14
+spec:
+  type: ClusterIP
+  selector:
+    app: wrong-app
+  ports:
+    - port: 80
+      targetPort: 80

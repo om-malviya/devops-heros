@@ -1,0 +1,10 @@
+Notes app "{{ .Release.Name }}" ({{ .Values.app.environment }}) deployed - revision {{ .Release.Revision }}.
+
+  image    : {{ .Values.image.repository }}:{{ .Values.image.tag }}
+  replicas : {{ .Values.replicaCount }}
+  NodePort : {{ .Values.service.nodePort }}
+
+Verify:
+  kubectl get pods,svc,configmap -n {{ .Release.Namespace }} -l app={{ .Release.Name }}
+  kubectl port-forward svc/{{ .Release.Name }}-svc -n {{ .Release.Namespace }} 8080:{{ .Values.service.port }}
+  curl -s http://localhost:8080 | head -4

@@ -1,0 +1,50 @@
+# Argo CD Application: watches the Helm chart in Git and keeps the cluster in sync with it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: taskboard-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io   # cascade-delete the app resources when the Application is deleted
+  labels:
+    app.kubernetes.io/part-of: taskboard
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/om-malviya/devops-heros.git
+    targetRevision: main
+    path: homework/session21-final-devops-project/helm/taskboard
+    helm:
+      releaseName: taskboard
+      valueFiles:
+        - values-dev.yaml
+      # image tags are bumped here by the CD step (or by Argo CD Image Updater) instead of helm --set
+      parameters:
+        - name: backend.image.tag
+          value: latest
+        - name: frontend.image.tag
+          value: latest
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: taskboard
+  syncPolicy:
+    automated:
+      prune: true        # delete resources removed from Git
+      selfHeal: true     # revert manual kubectl edits
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+  ignoreDifferences:
+    # the HPA owns the replica count of the backend Deployment
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

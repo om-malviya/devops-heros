@@ -1,0 +1,15 @@
+{{ .Chart.Name }} release "{{ .Release.Name }}" revision {{ .Release.Revision }} deployed to namespace {{ .Release.Namespace }}.
+
+  image    : {{ .Values.image.repository }}:{{ .Values.image.tag }}
+  replicas : {{ .Values.replicaCount }}
+  message  : {{ .Values.message }}
+
+Check the rollout:
+  kubectl rollout status deployment/{{ include "webapp.fullname" . }} -n {{ .Release.Namespace }}
+
+Test the page (the message above should appear in the HTML):
+  kubectl port-forward svc/{{ include "webapp.fullname" . }} -n {{ .Release.Namespace }} 8080:{{ .Values.service.port }}
+  curl http://localhost:8080
+
+See the revision history:
+  helm history {{ .Release.Name }} -n {{ .Release.Namespace }}

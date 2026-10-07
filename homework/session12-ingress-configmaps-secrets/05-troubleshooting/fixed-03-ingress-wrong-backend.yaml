@@ -1,0 +1,27 @@
+# SCENARIO 3 (FIXED): backend service name and port match `kubectl get svc -n s12`.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ts-ingress
+  namespace: s12
+  labels:
+    scenario: "3"
+spec:
+  rules:
+    - host: ts.demo.local
+      http:
+        paths:
+          - path: /app1
+            pathType: Prefix
+            backend:
+              service:
+                name: app1         # FIX: real Service name
+                port:
+                  number: 80       # FIX: real Service port
+          - path: /app2
+            pathType: Prefix
+            backend:
+              service:
+                name: app2
+                port:
+                  number: 80

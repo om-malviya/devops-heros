@@ -1,0 +1,21 @@
+# LoadBalancer: asks the cloud-controller (or k3s servicelb / minikube tunnel)
+# for an external IP. Builds on NodePort + ClusterIP underneath.
+# Service port is 8081, not 80: k3s servicelb binds the Service port on the
+# node (hostPort), and the bundled Traefik ingress already owns 80/443, so a
+# port-80 LoadBalancer would stay <pending> forever on a default k3s node.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-loadbalancer
+  namespace: s11
+  labels:
+    app: web-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: web-loadbalancer
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8080
+      protocol: TCP

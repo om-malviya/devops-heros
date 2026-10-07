@@ -1,0 +1,17 @@
+# Dynamic provisioning: NO PersistentVolume is created by hand. The StorageClass provisioner creates
+# one when the claim is used.
+#   k3s      -> StorageClass "local-path" (rancher.io/local-path), default, WaitForFirstConsumer
+#   minikube -> StorageClass "standard"   (k8s.io/minikube-hostpath), default, Immediate
+# Omit storageClassName entirely to use whichever class is the cluster default.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-pvc
+  namespace: s13
+spec:
+  storageClassName: local-path     # minikube: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

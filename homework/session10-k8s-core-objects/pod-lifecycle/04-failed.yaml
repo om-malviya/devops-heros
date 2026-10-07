@@ -1,0 +1,15 @@
+# Same task but exits 1. With restartPolicy: Never the Pod reaches phase
+# Failed (shown as STATUS Error).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-failed
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  restartPolicy: Never
+  containers:
+    - name: task
+      image: busybox:1.36
+      command: ["sh", "-c", "echo 'Task started'; sleep 5; echo 'Task failed'; exit 1"]

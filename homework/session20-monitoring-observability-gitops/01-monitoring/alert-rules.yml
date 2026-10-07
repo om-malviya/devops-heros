@@ -1,0 +1,61 @@
+groups:
+  - name: host
+    rules:
+      - alert: HighCPU
+        expr: 100 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.instance }}"
+          description: "CPU utilization is {{ $value | printf \"%.1f\" }}% (threshold 80%) for 2 minutes."
+
+      - alert: HighMemory
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory on {{ $labels.instance }}"
+          description: "Memory utilization is {{ $value | printf \"%.1f\" }}% (threshold 85%)."
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Target {{ $labels.job }}/{{ $labels.instance }} is down"
+          description: "Prometheus has not been able to scrape {{ $labels.instance }} for 1 minute."
+
+  - name: sample-app
+    rules:
+      - alert: AppUnhealthy
+        expr: up{job="sample-app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "sample-app is unhealthy"
+          description: "The /metrics endpoint of sample-app is not responding (up == 0)."
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(app_requests_total{status=~"5.."}[5m]))
+            /
+          sum(rate(app_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "sample-app 5xx error rate above 5%"
+          description: "{{ $value | humanizePercentage }} of requests returned 5xx in the last 5 minutes."
+
+      - alert: HighLatencyP95
+        expr: histogram_quantile(0.95, sum by (le) (rate(app_request_duration_seconds_bucket[5m]))) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "sample-app p95 latency above 500ms"
+          description: "p95 latency is {{ $value | printf \"%.3f\" }}s."

@@ -1,0 +1,25 @@
+# Local kind / minikube: single replicas, ingress on taskboard.local, no autoscaling.
+backend:
+  replicaCount: 1
+  image:
+    tag: latest
+frontend:
+  replicaCount: 1
+  image:
+    tag: latest
+config:
+  appEnv: dev
+  logLevel: debug
+postgres:
+  persistence:
+    size: 1Gi
+ingress:
+  enabled: true
+  host: taskboard.local
+hpa:
+  enabled: false
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true

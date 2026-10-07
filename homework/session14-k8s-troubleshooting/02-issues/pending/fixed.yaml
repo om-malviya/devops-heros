@@ -1,0 +1,32 @@
+# FIX 1: realistic requests.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pending-cpu
+  namespace: s14
+  labels:
+    app: pending-cpu
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "32Mi"
+        limits:
+          cpu: "200m"
+          memory: "64Mi"
+---
+# FIX 2: nodeSelector removed (alternatively: kubectl label node <node> disktype=nvme-does-not-exist).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pending-selector
+  namespace: s14
+  labels:
+    app: pending-selector
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine

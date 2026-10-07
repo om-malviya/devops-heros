@@ -1,0 +1,33 @@
+# Headless service required by the StatefulSet (stable pod DNS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-postgres-headless
+  namespace: taskboard
+  labels:
+    app: taskboard-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: taskboard-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+# ClusterIP service used by the backend (DATABASE_URL host = taskboard-postgres)
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-postgres
+  namespace: taskboard
+  labels:
+    app: taskboard-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: taskboard-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

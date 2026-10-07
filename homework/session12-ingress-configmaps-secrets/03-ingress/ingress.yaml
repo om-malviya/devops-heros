@@ -1,0 +1,36 @@
+# Task 3 - Path-based routing for host demo.local
+#   http://demo.local/app1  -> Service app1:80 -> http-echo pods ("Hello from app1")
+#   http://demo.local/app2  -> Service app2:80 -> http-echo pods ("Hello from app2")
+#
+# ingressClassName is deliberately left out so the cluster's DEFAULT IngressClass is used:
+#   * k3s      -> "traefik" (Traefik is installed by default; check: kubectl get ingressclass)
+#   * minikube -> "nginx"   (after: minikube addons enable ingress)
+# To pin a controller explicitly, uncomment ONE of the lines below.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+  namespace: s12
+  labels:
+    app: demo
+spec:
+  # ingressClassName: traefik   # k3s
+  # ingressClassName: nginx     # minikube / ingress-nginx
+  rules:
+    - host: demo.local
+      http:
+        paths:
+          - path: /app1
+            pathType: Prefix
+            backend:
+              service:
+                name: app1
+                port:
+                  number: 80
+          - path: /app2
+            pathType: Prefix
+            backend:
+              service:
+                name: app2
+                port:
+                  number: 80

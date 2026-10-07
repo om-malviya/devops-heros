@@ -1,0 +1,45 @@
+# Same alerts as ../alert-rules.yml, but as a CRD the Prometheus Operator loads.
+# Metric names follow the example app used in sample-app.yaml (http_requests_total{code},
+# http_request_duration_seconds); with my own image they would be app_requests_total{status}.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sample-app-rules
+  namespace: s20-sample-app
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: sample-app
+      rules:
+        - alert: AppUnhealthy
+          expr: up{job="sample-app"} == 0
+          for: 30s
+          labels:
+            severity: critical
+          annotations:
+            summary: "sample-app target is down"
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{code=~"5.."}[5m]))
+              /
+            sum(rate(http_requests_total[5m])) > 0.05
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "sample-app 5xx error rate above 5%"
+        - alert: HighLatencyP95
+          expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 0.5
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "sample-app p95 latency above 500ms"
+        - alert: SampleAppPodNotReady
+          expr: kube_deployment_status_replicas_available{deployment="sample-app"} < kube_deployment_spec_replicas{deployment="sample-app"}
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "sample-app has fewer available replicas than desired"

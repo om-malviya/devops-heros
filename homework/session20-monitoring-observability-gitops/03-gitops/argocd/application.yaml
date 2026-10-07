@@ -1,0 +1,33 @@
+# Apply this ONCE from an admin machine: kubectl apply -f argocd/application.yaml
+# It is intentionally outside the Git path that Argo CD watches.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io   # deleting the Application also removes the app
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/om-malviya/devops-heros.git
+    targetRevision: main
+    path: homework/session20-monitoring-observability-gitops/03-gitops/gitops-repo/apps/demo-app
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-app
+
+  syncPolicy:
+    automated:
+      prune: true       # resources removed from Git are removed from the cluster
+      selfHeal: true    # manual cluster changes are reverted to what Git says
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

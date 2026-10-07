@@ -1,0 +1,21 @@
+# Task 1 - ConfigMap with literal keys AND a whole config file as one key.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: s12
+  labels:
+    app: configmap-demo
+data:
+  # Literal key/value pairs -> become environment variables
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  APP_PORT: "8080"
+  THEME_COLOR: "blue"
+  # A whole file stored under one key -> becomes /etc/config/app.properties when mounted
+  app.properties: |
+    app.name=configmap-demo
+    app.env=production
+    app.log.level=INFO
+    app.max.booking.days=30
+    app.default.currency=INR

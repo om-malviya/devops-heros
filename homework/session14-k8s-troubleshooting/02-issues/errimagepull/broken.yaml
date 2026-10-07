@@ -1,0 +1,15 @@
+# BUG: the image lives in a registry/repository that does not exist (or is private
+# and no imagePullSecret is configured). Every pull attempt fails -> ErrImagePull.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: registry-demo
+  namespace: s14
+  labels:
+    app: registry-demo
+spec:
+  containers:
+    - name: api
+      image: ghcr.io/om-malviya-example/private-api:1.0.0
+      ports:
+        - containerPort: 8080

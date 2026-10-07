@@ -1,0 +1,4 @@
+# Tooling used by the CI pipeline (lint, SAST, SCA). Not installed in the Docker image.
+ruff==0.8.4
+bandit==1.8.0
+pip-audit==2.7.3

@@ -1,0 +1,14 @@
+TaskBoard {{ .Chart.AppVersion }} deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Check the rollout:
+  kubectl -n {{ .Release.Namespace }} get pods,svc,hpa,pvc -l app.kubernetes.io/instance={{ .Release.Name }}
+
+{{- if .Values.ingress.enabled }}
+Open the app (add "127.0.0.1 {{ .Values.ingress.host }}" to /etc/hosts for a local cluster):
+  http://{{ .Values.ingress.host }}/        (frontend)
+  http://{{ .Values.ingress.host }}/api/tasks
+{{- else }}
+No ingress enabled. Port-forward instead:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "taskboard.fullname" . }}-frontend 3000:{{ .Values.frontend.servicePort }}
+  open http://localhost:3000
+{{- end }}

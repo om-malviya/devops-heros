@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-frontend
+  namespace: taskboard
+  labels:
+    app: taskboard-frontend
+    app.kubernetes.io/part-of: taskboard
+spec:
+  type: ClusterIP
+  selector:
+    app: taskboard-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

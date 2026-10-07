@@ -1,0 +1,48 @@
+# Task 1 expressed declaratively: 3 containers, 3 networks, backend in 2 networks.
+# Usage:  docker compose up -d   |   docker compose ps   |   docker compose down -v
+services:
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    ports:
+      - "8091:80"
+    networks:
+      - frontend-net
+
+  backend:
+    image: nginx:alpine
+    container_name: backend
+    networks:
+      - frontend-net
+      - backend-net
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: demo
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - backend-net
+      - db-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpass123", "--silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+  db-net:
+    driver: bridge
+
+volumes:
+  db_data:

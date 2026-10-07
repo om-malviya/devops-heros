@@ -1,0 +1,9 @@
+# Bandit (Python SAST) configuration - used by: bandit -c security/bandit.yaml -r application/backend/app
+exclude_dirs:
+  - tests
+  - alembic
+  - .venv
+skips:
+  # B104: binding 0.0.0.0 is intentional inside a container (uvicorn --host 0.0.0.0 in the Dockerfile CMD)
+  - B104
+# Report MEDIUM and above with MEDIUM confidence; CI fails on any reported finding.

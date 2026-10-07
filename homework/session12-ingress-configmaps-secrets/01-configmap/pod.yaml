@@ -1,0 +1,43 @@
+# Task 1 - Pod that consumes the ConfigMap in both supported ways:
+#   1. as environment variables (envFrom + a single env/configMapKeyRef)
+#   2. as a read-only volume mounted at /etc/config
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo
+  namespace: s12
+  labels:
+    app: configmap-demo
+spec:
+  containers:
+    - name: app
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      # (a) bulk-inject every key of the ConfigMap as an env var
+      envFrom:
+        - configMapRef:
+            name: app-config
+      # (b) pick one key and give it a different env var name
+      env:
+        - name: UI_THEME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: THEME_COLOR
+      # (c) mount the ConfigMap as files
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-config

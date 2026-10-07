@@ -1,0 +1,5 @@
+# CVEs that are accepted risks for this project. One CVE per line, with a reason and an
+# expiry date so the exception is reviewed. Trivy supports `exp:` to auto-expire entries.
+#
+# Example (commented out - no accepted risks today):
+# CVE-2024-99999 exp:2026-12-31   # false positive: vulnerable function not reachable from gunicorn

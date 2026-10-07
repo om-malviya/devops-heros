@@ -1,0 +1,28 @@
+# Gitleaks (secret scanning) configuration.
+# Local:  gitleaks detect --source . --config homework/session17-devsecops/security/gitleaks.toml -v
+# CI:     gitleaks/gitleaks-action@v2 with env GITLEAKS_CONFIG pointing at this file.
+title = "session17-devsecops gitleaks config"
+
+# Start from the built-in default rules (AWS, GitHub, Slack, private keys, generic API keys ...)
+[extend]
+useDefault = true
+
+# Project-specific rule: a demo token format used in this course
+[[rules]]
+id = "course-demo-token"
+description = "Course demo token (DEMO_TOKEN_...)"
+regex = '''DEMO_TOKEN_[A-Za-z0-9]{16,}'''
+tags = ["demo", "token"]
+
+# Allowlist: paths and values that are known to be fake
+[allowlist]
+description = "Known safe placeholders"
+paths = [
+  '''(^|/)tests/''',
+  '''\.md$''',
+]
+regexes = [
+  '''replace-with-test-value''',
+  '''24BCS10448''',
+  '''example\.com''',
+]

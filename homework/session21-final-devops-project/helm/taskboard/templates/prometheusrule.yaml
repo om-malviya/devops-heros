@@ -1,0 +1,33 @@
+{{- if .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "taskboard.fullname" . }}-alerts
+  labels:
+    {{- include "taskboard.labels" . | nindent 4 }}
+    {{- toYaml .Values.monitoring.prometheusRule.labels | nindent 4 }}
+spec:
+  groups:
+    - name: taskboard.rules
+      rules:
+        - alert: TaskboardBackendDown
+          expr: sum(up{job=~".*{{ include "taskboard.fullname" . }}-backend.*"}) == 0
+          for: 2m
+          labels: {severity: critical}
+          annotations:
+            summary: "No TaskBoard backend targets are up"
+        - alert: TaskboardHighErrorRate
+          expr: |
+            sum(rate(http_requests_total{handler=~"/api.*",status=~"5.."}[5m]))
+              / sum(rate(http_requests_total{handler=~"/api.*"}[5m])) > 0.05
+          for: 5m
+          labels: {severity: warning}
+          annotations:
+            summary: "More than 5% of API requests are failing"
+        - alert: TaskboardHighLatency
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{handler=~"/api.*"}[5m])) by (le)) > 0.5
+          for: 5m
+          labels: {severity: warning}
+          annotations:
+            summary: "p95 API latency above 500ms"
+{{- end }}

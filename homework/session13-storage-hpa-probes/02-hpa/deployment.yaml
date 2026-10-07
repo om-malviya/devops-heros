@@ -1,0 +1,59 @@
+# Task 2 - CPU-bound HTTP app for the HPA demo.
+# Why not registry.k8s.io/hpa-example? That image is amd64-only and fails on arm64 (Apple Silicon /
+# Raspberry Pi k3s). python:3.12-alpine is multi-arch; the inline server burns ~20-40 ms of CPU per
+# request (a loop of integer math), which is what makes CPU utilisation climb under load - the same
+# idea as the php "index.php" busy loop in the upstream example.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpu-app
+  namespace: s13
+  labels:
+    app: cpu-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cpu-app
+  template:
+    metadata:
+      labels:
+        app: cpu-app
+    spec:
+      containers:
+        - name: cpu-app
+          image: python:3.12-alpine
+          command:
+            - python3
+            - -c
+            - |
+              from http.server import HTTPServer, BaseHTTPRequestHandler
+              class H(BaseHTTPRequestHandler):
+                  def log_message(self, *a): pass
+                  def do_GET(self):
+                      x = 0
+                      for i in range(300000):      # burn some CPU per request
+                          x += i * i % 7
+                      body = f"OK x={x}\n".encode()
+                      self.send_response(200)
+                      self.send_header("Content-Type", "text/plain")
+                      self.send_header("Content-Length", str(len(body)))
+                      self.end_headers()
+                      self.wfile.write(body)
+              HTTPServer(("0.0.0.0", 8080), H).serve_forever()
+          ports:
+            - containerPort: 8080
+          # resources.requests.cpu is REQUIRED: HPA computes utilisation = usage / request.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 32Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5

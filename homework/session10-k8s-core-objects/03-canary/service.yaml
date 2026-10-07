@@ -1,0 +1,19 @@
+# One Service selects BOTH deployments through the shared label app=web.
+# kube-proxy spreads requests over all 10 endpoints, so the split is the pod ratio.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: s10
+  labels:
+    app: web
+spec:
+  type: NodePort
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30030
+      protocol: TCP

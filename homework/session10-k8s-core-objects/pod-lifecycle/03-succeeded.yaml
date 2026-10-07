@@ -1,0 +1,15 @@
+# One-shot task that exits 0. restartPolicy: Never so the Pod reaches
+# phase Succeeded (shown as STATUS Completed).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-succeeded
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  restartPolicy: Never
+  containers:
+    - name: task
+      image: busybox:1.36
+      command: ["sh", "-c", "echo 'Task started'; sleep 5; echo 'Task completed successfully'; exit 0"]

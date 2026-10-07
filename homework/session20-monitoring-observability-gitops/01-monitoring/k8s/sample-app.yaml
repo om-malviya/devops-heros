@@ -1,0 +1,72 @@
+# The sample app deployed to Kubernetes.
+#
+# Image choice: the cluster I ran this on (k3s on Colima, containerd runtime) cannot see
+# images built by the local Docker daemon and there is no registry, so instead of my
+# own session20-sample-app image I use the public Prometheus example app. It exposes the
+# same shape of metrics (http_requests_total counter, http_request_duration_seconds
+# histogram, a version gauge) on :8080/metrics and answers 200 on "/".
+# On kind the custom image can be used instead:
+#   docker build -t session20-sample-app:1.0 ../sample-app
+#   kind load docker-image session20-sample-app:1.0 --name session20
+#   then set image: session20-sample-app:1.0, containerPort 8000 and probe path /health.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: s20-sample-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-app
+  namespace: s20-sample-app
+  labels:
+    app: sample-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+        - name: app
+          image: quay.io/brancz/prometheus-example-app:v0.5.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-app
+  namespace: s20-sample-app
+  labels:
+    app: sample-app        # ServiceMonitor selects on this label
+spec:
+  selector:
+    app: sample-app
+  ports:
+    - name: http           # ServiceMonitor references this port name
+      port: 8080
+      targetPort: http

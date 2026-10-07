@@ -1,0 +1,61 @@
+# Values for the prometheus-community/kube-prometheus-stack chart.
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     -n monitoring --create-namespace -f monitoring/kube-prometheus-stack-values.yaml
+fullnameOverride: kube-prometheus-stack
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    scrapeInterval: 15s
+    # Pick up ServiceMonitors / PrometheusRules from every namespace, not only those with the release label
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    ruleNamespaceSelector: {}
+    resources:
+      requests: {cpu: 200m, memory: 512Mi}
+      limits: {cpu: 1000m, memory: 1Gi}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+grafana:
+  enabled: true
+  adminPassword: grafana-demo-admin      # FAKE - override with --set grafana.adminPassword=... or an existing secret
+  defaultDashboardsEnabled: true
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard           # ConfigMaps with this label are auto-imported (see grafana-dashboard-configmap.yaml)
+      labelValue: "1"
+      searchNamespace: ALL
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts: [grafana.taskboard.local]
+
+alertmanager:
+  enabled: true
+  config:
+    route:
+      receiver: "null"
+      group_by: [alertname, namespace]
+    receivers:
+      - name: "null"
+
+# Classroom cluster: disable components that do not exist on kind/EKS managed control plane
+kubeControllerManager: {enabled: false}
+kubeScheduler: {enabled: false}
+kubeEtcd: {enabled: false}
+kubeProxy: {enabled: false}
+
+nodeExporter: {enabled: true}
+kubeStateMetrics: {enabled: true}

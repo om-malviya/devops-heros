@@ -1,0 +1,17 @@
+# Trivy configuration (image scan gate). Used via --config / trivy-config in CI.
+severity:
+  - HIGH
+  - CRITICAL
+scan:
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+vulnerability:
+  type:
+    - os
+    - library
+  # Only fail on CVEs that have a fix available. NOTE: this key lives under "vulnerability:" in the config
+  # file (the CLI flag is --ignore-unfixed); a top-level "ignore-unfixed:" is silently ignored by Trivy.
+  ignore-unfixed: true
+timeout: 10m

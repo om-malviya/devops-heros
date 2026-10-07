@@ -1,0 +1,14 @@
+# Static provisioning step 2: a developer claims storage. Binds to s13-static-pv because
+# class, access mode and size (500Mi <= 1Gi) all match.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-pvc
+  namespace: s13
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

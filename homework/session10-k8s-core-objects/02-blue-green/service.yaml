@@ -1,0 +1,20 @@
+# The Service is THE switch. Only the "version" selector value changes
+# between blue and green; see switch-to-green.sh / switch-to-blue.sh.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-bg
+  namespace: s10
+  labels:
+    app: web-bg
+spec:
+  type: NodePort
+  selector:
+    app: web-bg
+    version: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30020
+      protocol: TCP

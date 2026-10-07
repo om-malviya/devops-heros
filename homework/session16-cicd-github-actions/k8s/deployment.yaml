@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session16-calculator-api
+  labels:
+    app: session16-calculator-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: session16-calculator-api
+  template:
+    metadata:
+      labels:
+        app: session16-calculator-api
+    spec:
+      containers:
+        - name: api
+          # __IMAGE__ is replaced by the CD job with ghcr.io/<owner>/session16-calculator-api:<git sha>
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false

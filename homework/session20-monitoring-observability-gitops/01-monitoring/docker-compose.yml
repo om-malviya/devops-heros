@@ -1,0 +1,85 @@
+# Session 20 homework - monitoring stack
+# prometheus  : scrapes everything, evaluates alert rules
+# node-exporter: host CPU / memory / disk metrics
+# cadvisor    : per-container CPU / memory metrics
+# alertmanager: receives alerts from Prometheus and routes them
+# grafana     : dashboards (datasource + dashboard are provisioned from ./grafana)
+# sample-app  : tiny python app exposing /metrics and /health
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: session20-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=2d
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - alertmanager
+      - sample-app
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: session20-node-exporter
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: session20-cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8081:8080"
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: session20-alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: session20-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin   # lab only, never in production
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  sample-app:
+    build: ./sample-app
+    image: session20-sample-app:1.0
+    container_name: session20-sample-app
+    ports:
+      - "8000:8000"
+
+volumes:
+  prometheus-data:
+  grafana-data:

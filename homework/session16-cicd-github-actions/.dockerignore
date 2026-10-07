@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+reports
+build
+tests
+k8s
+*.md
+.gitignore
+.flake8
+requirements-dev.txt

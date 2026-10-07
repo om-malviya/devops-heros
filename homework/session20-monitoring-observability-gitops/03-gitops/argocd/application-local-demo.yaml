@@ -1,0 +1,45 @@
+# Second Application used for the live demo on this machine.
+#
+# Why it exists: application.yaml points at MY fork (om-malviya/devops-heros), which is
+# not pushed to GitHub yet, so Argo CD cannot clone it and that Application stays in
+# "Unknown / ComparisonError: repository not found". To show the real GitOps loop
+# anyway, this Application watches the PUBLIC upstream course repository instead,
+# at the mini-project folder that holds plain manifests (namespace, deployment, service).
+# Everything else (automated sync, selfHeal, prune, CreateNamespace) is identical to
+# application.yaml, so once the fork is pushed application.yaml behaves exactly like this.
+#
+# directory.exclude: that upstream folder also contains an argocd-application.yaml
+# template (repoURL YOUR_USERNAME/...). It must not be applied as a workload, so it is excluded.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: upstream-mini-demo
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/Nency-Ravaliya/devops-heros.git
+    targetRevision: main
+    path: session20-monitoring-observability-gitops/08-mini-project/app
+    directory:
+      exclude: argocd-application.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: session20          # the upstream manifests hard-code this namespace
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

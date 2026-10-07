@@ -1,0 +1,29 @@
+# Startup: "have you finished starting?" - liveness/readiness are paused until it succeeds.
+# failureThreshold * periodSeconds = 30 * 2 = up to 60s allowed for a slow start.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: startup-demo
+  namespace: s13
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      startupProbe:
+        httpGet:
+          path: /
+          port: 80
+        failureThreshold: 30
+        periodSeconds: 2
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        periodSeconds: 5

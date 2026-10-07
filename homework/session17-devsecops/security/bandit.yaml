@@ -1,0 +1,17 @@
+# Bandit (SAST) configuration - used as:  bandit -c security/bandit.yaml -r app
+# Docs: https://bandit.readthedocs.io/en/latest/config.html
+
+# Scan only our source; tests legitimately use assert and fake values.
+exclude_dirs:
+  - tests
+  - .venv
+  - venv
+  - build
+  - dist
+
+# Run every test. To make a finding advisory instead of blocking, add its ID to `skips`
+# with a justification, e.g.:
+#   skips: ["B101"]   # assert_used - we do not ship with -O
+skips: []
+
+# Confidence/severity thresholds are passed on the CLI (-ll -ii = MEDIUM and above).

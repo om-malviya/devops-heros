@@ -1,0 +1,45 @@
+# FIX: create the ConfigMap and the Secret the Pod mounts, and reference them by
+# their real names. (Placeholder secret values only.)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cc-config
+  namespace: s14
+data:
+  app.properties: |
+    greeting=hello
+    log.level=info
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cc-secret
+  namespace: s14
+type: Opaque
+stringData:
+  api-key: "fake-api-key-change-me"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cc-demo
+  namespace: s14
+  labels:
+    app: cc-demo
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      volumeMounts:
+        - name: config
+          mountPath: /etc/app
+        - name: creds
+          mountPath: /etc/creds
+          readOnly: true
+  volumes:
+    - name: config
+      configMap:
+        name: cc-config
+    - name: creds
+      secret:
+        secretName: cc-secret

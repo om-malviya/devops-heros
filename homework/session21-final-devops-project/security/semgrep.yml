@@ -1,0 +1,24 @@
+# Project-specific Semgrep rules; CI also loads the public rulesets p/python and p/owasp-top-ten.
+rules:
+  - id: taskboard-hardcoded-database-url
+    message: Database URL with credentials is hard-coded. Read it from settings/env (Secret) instead.
+    severity: ERROR
+    languages: [python]
+    pattern-regex: 'postgresql(\+psycopg)?://[A-Za-z0-9_]+:(?!taskboard@localhost)[^@\s]+@(?!localhost)'
+    paths:
+      exclude: [tests, "*.example"]
+  - id: taskboard-fastapi-cors-wildcard-with-credentials
+    message: CORS allow_origins=["*"] combined with allow_credentials=True is insecure.
+    severity: WARNING
+    languages: [python]
+    pattern: app.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ..., allow_credentials=True, ...)
+  - id: taskboard-react-dangerously-set-inner-html
+    message: dangerouslySetInnerHTML can introduce XSS; render data as text.
+    severity: WARNING
+    languages: [javascript, typescript]
+    pattern: dangerouslySetInnerHTML={...}
+  - id: taskboard-no-eval
+    message: eval() on untrusted input is code injection.
+    severity: ERROR
+    languages: [python]
+    pattern: eval(...)

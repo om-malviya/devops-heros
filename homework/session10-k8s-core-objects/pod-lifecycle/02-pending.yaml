@@ -1,0 +1,17 @@
+# Requests far more CPU/memory than any lab node has, so the scheduler
+# cannot place it and the Pod stays in phase Pending.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-pending
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  containers:
+    - name: impossible-resource
+      image: nginx:alpine
+      resources:
+        requests:
+          cpu: "64"
+          memory: "512Gi"

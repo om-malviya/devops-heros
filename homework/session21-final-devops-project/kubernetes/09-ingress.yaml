@@ -1,0 +1,28 @@
+# Requires an ingress controller (ingress-nginx). Add to /etc/hosts:  127.0.0.1 taskboard.local
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taskboard
+  namespace: taskboard
+  labels:
+    app.kubernetes.io/part-of: taskboard
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: taskboard.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: taskboard-backend
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: taskboard-frontend
+                port:
+                  number: 80

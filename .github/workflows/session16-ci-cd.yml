@@ -1,0 +1,228 @@
+# Session 16 - CI/CD pipeline for homework/session16-cicd-github-actions
+#
+# CI  : lint + unit tests (+ test report artifact)
+# BUILD: Docker image, smoke-tested, saved as an artifact
+# CD  : push image to GHCR and deploy to Kubernetes (only on push to main)
+name: Session 16 - CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "homework/session16-cicd-github-actions/**"
+      - ".github/workflows/session16-ci-cd.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "homework/session16-cicd-github-actions/**"
+      - ".github/workflows/session16-ci-cd.yml"
+  workflow_dispatch:
+
+# Variables shared by every job
+env:
+  PROJECT_DIR: homework/session16-cicd-github-actions
+  IMAGE_NAME: session16-calculator-api
+  PYTHON_VERSION: "3.12"
+
+# All `run:` steps execute inside the project folder
+defaults:
+  run:
+    working-directory: homework/session16-cicd-github-actions
+
+# Least privilege by default; the cd job raises `packages: write`
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------
+  # JOB 1 - CI: lint and test
+  # ------------------------------------------------------------------
+  ci:
+    name: CI - Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint with flake8
+        run: flake8 app tests
+
+      - name: Run unit tests (JUnit + coverage)
+        run: |
+          pytest -v \
+            --junitxml=reports/junit.xml \
+            --cov=app --cov-report=term-missing \
+            --cov-report=xml:reports/coverage.xml
+
+      - name: Upload test report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: ${{ env.PROJECT_DIR }}/reports/
+          retention-days: 14
+
+  # ------------------------------------------------------------------
+  # JOB 2 - BUILD: Docker image (runs only if ci succeeded)
+  # ------------------------------------------------------------------
+  build:
+    name: Build - Docker image
+    needs: ci
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Compute image name (lowercase) and tag
+        id: meta
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"            # GHCR requires lowercase
+          echo "image=ghcr.io/${OWNER}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (not pushed yet)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.PROJECT_DIR }}
+          file: ${{ env.PROJECT_DIR }}/Dockerfile
+          push: false
+          load: true
+          build-args: |
+            GIT_SHA=${{ steps.meta.outputs.tag }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the container
+        run: |
+          docker run -d --rm --name smoke -p 8000:8000 \
+            "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}"
+          for i in $(seq 1 15); do
+            curl -fs http://localhost:8000/health && break
+            sleep 1
+          done
+          echo
+          curl -fs "http://localhost:8000/api/calc?a=10&b=5&op=add"
+          echo
+          docker stop smoke
+
+      - name: Save image as tar
+        run: |
+          mkdir -p dist
+          docker save \
+            "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}" \
+            "${{ steps.meta.outputs.image }}:latest" \
+            -o dist/image.tar
+          ls -lh dist/
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: ${{ env.PROJECT_DIR }}/dist/image.tar
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # JOB 3 - CD: push to GHCR and deploy (push to main only)
+  # ------------------------------------------------------------------
+  cd:
+    name: CD - Push to GHCR and Deploy
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ${{ needs.build.outputs.image }}
+      TAG: ${{ needs.build.outputs.tag }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: ${{ env.PROJECT_DIR }}/dist
+
+      - name: Load image
+        run: docker load -i dist/image.tar
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image (sha + latest tags)
+        run: |
+          docker push "${IMAGE}:${TAG}"
+          docker push "${IMAGE}:latest"
+
+      - name: Render Kubernetes manifests with the new image tag
+        run: |
+          mkdir -p rendered
+          sed "s|__IMAGE__|${IMAGE}:${TAG}|g" k8s/deployment.yaml > rendered/deployment.yaml
+          cp k8s/service.yaml rendered/service.yaml
+          grep -n "image:" rendered/deployment.yaml
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-manifests
+          path: ${{ env.PROJECT_DIR }}/rendered/
+
+      - name: Check whether a KUBE_CONFIG secret is configured
+        id: kubeconfig
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          if [ -n "$KUBE_CONFIG" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "KUBE_CONFIG secret found - will deploy."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "KUBE_CONFIG secret not set - deployment will be simulated."
+          fi
+
+      - name: Deploy to Kubernetes
+        if: steps.kubeconfig.outputs.configured == 'true'
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBE_CONFIG" | base64 --decode > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl apply -f rendered/
+          kubectl rollout status deployment/session16-calculator-api --timeout=120s
+          kubectl get pods -l app=session16-calculator-api
+
+      - name: Simulated deploy (no cluster credentials)
+        if: steps.kubeconfig.outputs.configured == 'false'
+        run: |
+          echo "::notice title=Deploy skipped::No KUBE_CONFIG secret. Manifest that would be applied:"
+          cat rendered/deployment.yaml
+          echo "---"
+          cat rendered/service.yaml

@@ -1,0 +1,15 @@
+# Default (development) values for notes-chart.
+replicaCount: 1
+
+image:
+  repository: nginx
+  # alpine tags are small and multi-arch (amd64 + arm64)
+  tag: "1.26-alpine"
+
+service:
+  port: 80
+  nodePort: 30090
+
+app:
+  name: notes-app
+  environment: development

@@ -1,0 +1,21 @@
+# Standalone ServiceMonitor for the raw kubernetes/ manifests (the Helm chart renders its own when
+# monitoring.serviceMonitor.enabled=true). Prometheus Operator scrapes every Pod behind the selected Service.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: taskboard-backend
+  namespace: taskboard
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/part-of: taskboard
+spec:
+  namespaceSelector:
+    matchNames: [taskboard]
+  selector:
+    matchLabels:
+      app: taskboard-backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s

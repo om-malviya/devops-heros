@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "taskboard.fullname" . }}-config
+  labels:
+    {{- include "taskboard.labels" . | nindent 4 }}
+data:
+  APP_NAME: {{ .Values.config.appName | quote }}
+  APP_ENV: {{ .Values.config.appEnv | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  BACKEND_HOST: {{ include "taskboard.fullname" . }}-backend
+  BACKEND_PORT: {{ .Values.backend.port | quote }}
+  POSTGRES_DB: {{ .Values.postgres.database | quote }}

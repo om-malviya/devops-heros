@@ -1,0 +1,23 @@
+# Default values for webapp.
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: alpine
+  pullPolicy: IfNotPresent
+
+# Rendered into the ConfigMap (and served as index.html) so that a value change
+# is visible from the outside after an upgrade or a rollback.
+message: "Hello from webapp v1"
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi

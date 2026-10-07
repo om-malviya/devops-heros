@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskboard-config
+  namespace: taskboard
+  labels:
+    app.kubernetes.io/part-of: taskboard
+data:
+  # Backend (pydantic-settings reads these as upper-case env vars)
+  APP_NAME: "TaskBoard API"
+  APP_ENV: "kubernetes"
+  LOG_LEVEL: "info"
+  # Frontend nginx template values
+  BACKEND_HOST: "taskboard-backend"
+  BACKEND_PORT: "8000"
+  # Postgres
+  POSTGRES_DB: "taskboard"

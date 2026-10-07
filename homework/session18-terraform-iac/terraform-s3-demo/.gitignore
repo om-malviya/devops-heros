@@ -1,0 +1,14 @@
+# Provider plugins and modules downloaded by `terraform init`
+.terraform/
+
+# State files can contain sensitive values - never commit them
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# Saved plans and crash logs
+*.tfplan
+crash.log
+crash.*.log
+
+# Keep .terraform.lock.hcl committed so everyone uses the same provider versions.

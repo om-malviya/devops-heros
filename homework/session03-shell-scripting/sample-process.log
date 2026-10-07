@@ -1,0 +1,15 @@
+USER               PID  %CPU %MEM      VSZ    RSS   TT  STAT STARTED      TIME COMMAND
+ommalviya        42892  82.5  1.5 1893751216 246608   ??  S    10:15PM   0:04.68 /private/var/folder
+ommalviya        43012  23.1  2.2 440983664 362320   ??  S    10:15PM   0:30.46 /Users/ommalviya/.vs
+root             42809  21.0  0.2 435357696  27760   ??  Ss   10:15PM   0:03.00 /System/Library/Priv
+ommalviya        21678  17.2  3.3 1951423392 555696   ??  S    11:23AM  16:22.17 /Applications/Googl
+_windowserver      166  17.0  0.5 437196320  75776   ??  Ss   22Sep26 898:31.14 /System/Library/Priv
+ommalviya        48222  14.4  0.1 435375920  13488   ??  S    10:27PM   0:00.05 /System/Library/Fram
+ommalviya        48221  14.3  0.1 435376144  24016   ??  S    10:27PM   0:00.06 /System/Library/Fram
+ommalviya        48220  14.1  0.1 435376592  19104   ??  S    10:27PM   0:00.05 /System/Library/Fram
+ommalviya        48223  13.2  0.1 435376240  24016   ??  S    10:27PM   0:00.06 /System/Library/Fram
+ommalviya        48224  12.9  0.1 435376912  19120   ??  S    10:27PM   0:00.05 /System/Library/Fram
+ommalviya         1385  11.9  0.7 489035696 116736   ??  S    22Sep26 291:44.47 /Applications/Google
+root               134   8.4  0.0 435363616   7632   ??  Ss   22Sep26  10:10.90 /usr/libexec/opendir
+ommalviya         2734   8.1  1.7 1890647392 293264   ??  S    Tue07PM   3:14.77 /private/var/folder
+ommalviya        48166   7.4  0.3 411587152  55536   ??  S    10:27PM   0:00.36 /Library/Frameworks/

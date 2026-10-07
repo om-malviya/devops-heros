@@ -1,0 +1,52 @@
+# Three ordered pods web-0, web-1, web-2. An init container writes the pod's
+# own hostname into index.html so each pod answers with its name.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+  namespace: s11
+  labels:
+    app: web-headless
+spec:
+  serviceName: web          # must match the headless Service name
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-headless
+  template:
+    metadata:
+      labels:
+        app: web-headless
+    spec:
+      initContainers:
+        - name: write-hostname
+          image: busybox:1.36
+          command: ["sh", "-c", "echo \"I am $(hostname)\" > /html/index.html"]
+          volumeMounts:
+            - name: html
+              mountPath: /html
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 3
+      volumes:
+        - name: html
+          emptyDir: {}

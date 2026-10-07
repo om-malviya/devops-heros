@@ -1,0 +1,14 @@
+# BUG: the image tag does not exist on Docker Hub.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-demo
+  namespace: s14
+  labels:
+    app: image-demo
+spec:
+  containers:
+    - name: web
+      image: nginx:this-tag-does-not-exist
+      ports:
+        - containerPort: 80

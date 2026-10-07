@@ -1,0 +1,104 @@
+# Default values for the taskboard chart.
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []           # e.g. [{name: ghcr-pull-secret}]
+
+backend:
+  image:
+    repository: ghcr.io/om-malviya/taskboard-backend
+    tag: ""                 # defaults to Chart.appVersion; CI overrides with the git SHA
+  replicaCount: 2
+  port: 8000
+  resources:
+    requests: {cpu: 100m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+  probes:
+    startup:   {path: /health, periodSeconds: 5,  failureThreshold: 24}
+    readiness: {path: /ready,  periodSeconds: 10, failureThreshold: 3}
+    liveness:  {path: /health, periodSeconds: 15, failureThreshold: 3}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities: {drop: ["ALL"]}
+
+frontend:
+  image:
+    repository: ghcr.io/om-malviya/taskboard-frontend
+    tag: ""
+  replicaCount: 2
+  port: 8080                # nginx-unprivileged listens on 8080
+  servicePort: 80
+  resources:
+    requests: {cpu: 50m, memory: 32Mi}
+    limits: {cpu: 200m, memory: 128Mi}
+  podSecurityContext:
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true   # /tmp and /etc/nginx/conf.d are emptyDir volumes
+    capabilities: {drop: ["ALL"]}
+
+# Non-sensitive configuration -> ConfigMap
+config:
+  appName: "TaskBoard API"
+  appEnv: "kubernetes"
+  logLevel: "info"
+
+postgres:
+  enabled: true             # set false to use an external database (e.g. RDS) via externalDatabaseUrl
+  image: postgres:16-alpine
+  database: taskboard
+  username: taskboard
+  # FAKE default. Override with --set postgres.password=... or an existing secret in real environments.
+  password: changeme-demo-password
+  existingSecret: ""        # name of a pre-created Secret with keys POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: ""        # "" = cluster default
+  resources:
+    requests: {cpu: 100m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 70             # postgres uid/gid in the alpine image
+    runAsGroup: 70
+    fsGroup: 70
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true   # /var/run/postgresql and /tmp are emptyDir volumes
+    capabilities: {drop: ["ALL"]}
+externalDatabaseUrl: ""     # used only when postgres.enabled=false
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: nginx
+  host: taskboard.local
+  annotations: {}
+  tls: []                   # - {secretName: taskboard-tls, hosts: [taskboard.example.com]}
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+
+monitoring:
+  serviceMonitor:
+    enabled: false          # requires the Prometheus Operator CRDs (kube-prometheus-stack)
+    interval: 15s
+    labels:
+      release: kube-prometheus-stack
+  prometheusRule:
+    enabled: false
+    labels:
+      release: kube-prometheus-stack

@@ -1,0 +1,18 @@
+# Small in-cluster client used to curl the Services in this session.
+# busybox ships wget and nslookup, which is all we need.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: s10
+  labels:
+    role: client
+spec:
+  containers:
+    - name: client
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi

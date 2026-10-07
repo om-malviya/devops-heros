@@ -1,0 +1,13 @@
+# The image does not exist. Pod phase stays Pending; container state is
+# Waiting with reason ErrImagePull then ImagePullBackOff.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-image-error
+  namespace: s10
+  labels:
+    lab: pod-lifecycle
+spec:
+  containers:
+    - name: broken-image
+      image: registry.example.invalid/does-not-exist:v0.0.0

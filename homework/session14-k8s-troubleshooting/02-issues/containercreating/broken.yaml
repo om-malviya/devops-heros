@@ -1,0 +1,28 @@
+# BUG: the Pod mounts a ConfigMap and a Secret that do not exist.
+# kubelet cannot set up the volumes, so the Pod stays in ContainerCreating
+# (FailedMount events). Note: a *missing PVC* would NOT look like this - the
+# scheduler checks PVCs first and the Pod would stay Pending instead.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cc-demo
+  namespace: s14
+  labels:
+    app: cc-demo
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      volumeMounts:
+        - name: config
+          mountPath: /etc/app
+        - name: creds
+          mountPath: /etc/creds
+          readOnly: true
+  volumes:
+    - name: config
+      configMap:
+        name: cc-config-missing
+    - name: creds
+      secret:
+        secretName: cc-secret-missing

@@ -1,0 +1,17 @@
+# FIX (option A, used here): point at a public image that exists.
+# FIX (option B, for a real private registry): keep the private image and add
+#   imagePullSecrets referencing a docker-registry Secret, see README.md.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: registry-demo
+  namespace: s14
+  labels:
+    app: registry-demo
+spec:
+  containers:
+    - name: api
+      image: registry.k8s.io/e2e-test-images/agnhost:2.47
+      args: ["netexec", "--http-port=8080"]
+      ports:
+        - containerPort: 8080

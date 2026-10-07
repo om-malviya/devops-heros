@@ -1,0 +1,19 @@
+# Headless Service: clusterIP: None. No virtual IP, no kube-proxy rules.
+# DNS for "web" returns one A record per ready pod, and each StatefulSet pod
+# gets its own record <pod>.web.s11.svc.cluster.local.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: s11
+  labels:
+    app: web-headless
+spec:
+  clusterIP: None
+  selector:
+    app: web-headless
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

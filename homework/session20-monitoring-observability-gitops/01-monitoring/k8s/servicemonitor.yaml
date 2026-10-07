@@ -1,0 +1,20 @@
+# Tells the Prometheus Operator (installed by kube-prometheus-stack) to scrape
+# every Service in namespace sample-app with label app=sample-app on port "http".
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sample-app
+  namespace: s20-sample-app
+  labels:
+    release: monitoring      # matches the helm release name, harmless if selector is nil
+spec:
+  selector:
+    matchLabels:
+      app: sample-app
+  namespaceSelector:
+    matchNames:
+      - s20-sample-app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

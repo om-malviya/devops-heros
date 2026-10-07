@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmd-web
+  namespace: s14
+  labels:
+    app: cmd-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cmd-web
+  template:
+    metadata:
+      labels:
+        app: cmd-web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmd-web
+  namespace: s14
+spec:
+  selector:
+    app: cmd-web
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

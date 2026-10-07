@@ -1,0 +1,19 @@
+# NodePort: opens port 30081 on EVERY node and forwards to the ClusterIP
+# that is created underneath. Reachable from outside as <node-ip>:30081.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-nodeport
+  namespace: s11
+  labels:
+    app: web-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: web-nodeport
+  ports:
+    - name: http
+      port: 80          # service port inside the cluster
+      targetPort: 8080  # container port
+      nodePort: 30081   # host port on every node (30000-32767)
+      protocol: TCP
