@@ -1,6 +1,6 @@
 # Issue: ErrImagePull
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 `ErrImagePull` and `ImagePullBackOff` are two phases of the same problem:
 

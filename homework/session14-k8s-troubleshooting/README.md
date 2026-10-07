@@ -1,5 +1,5 @@
 # Session 14 – Kubernetes Troubleshooting
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Everything in this folder runs in the namespace `s14` (`namespace.yaml`). I ran all of it on a single-node k3s cluster (`colima`, Kubernetes v1.35.0+k3s1, arm64, 4 CPU / 6 GB, metrics-server and Traefik included), so the terminal blocks are labelled **Output (captured 2026-10-08)** and trimmed where noted; the manifests and scripts also work on kind/minikube (`kubectl apply -f namespace.yaml` first). Pod IPs are `10.42.x.x` and Service IPs `10.43.x.x` because that is the k3s default.
 

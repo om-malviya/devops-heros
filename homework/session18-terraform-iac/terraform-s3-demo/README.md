@@ -1,6 +1,6 @@
 # Terraform S3 Demo (Session 18 – Task 1)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This project creates one private, versioned, encrypted S3 bucket in `ap-south-1` with Terraform
 and documents the complete `init → fmt → validate → plan → apply → show → output → destroy` workflow.

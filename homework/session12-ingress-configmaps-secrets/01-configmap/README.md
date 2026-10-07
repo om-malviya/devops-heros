@@ -1,6 +1,6 @@
 # Task 1 – ConfigMap
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 A ConfigMap keeps non-sensitive configuration outside the container image so the same image can run
 in dev, staging and production with different settings. In this demo I create one ConfigMap that holds

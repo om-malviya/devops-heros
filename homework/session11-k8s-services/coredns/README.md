@@ -1,6 +1,6 @@
 # CoreDNS
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This is Task 4 of Session 11.
 

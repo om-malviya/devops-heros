@@ -1,6 +1,6 @@
 # 04 – ExternalName
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 An ExternalName Service has no selector, no pods, no ClusterIP and no
 Endpoints. CoreDNS simply answers the Service's cluster DNS name with a CNAME

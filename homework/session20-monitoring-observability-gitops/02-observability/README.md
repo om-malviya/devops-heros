@@ -1,5 +1,5 @@
 # Session 20 – Task 2: Observability documentation
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Task 2: Observability
 Understand the three major pillars (metrics, logs, traces) and document: what each pillar means, why observability is required, common tools, Kubernetes observability.

@@ -1,6 +1,6 @@
 # 03 – S3 (Simple Storage Service) – Storage
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## What is S3?
 

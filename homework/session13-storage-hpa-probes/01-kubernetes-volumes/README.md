@@ -1,6 +1,6 @@
 # Task 1 – Kubernetes Volumes
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 What I learned about storage in Kubernetes, with runnable examples. All examples use namespace
 `s13` (`kubectl apply -f ../namespace.yaml` first) and small multi-arch images (`busybox:1.36`,

@@ -1,6 +1,6 @@
 # 01 – Rolling Update
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 RollingUpdate is the default Deployment strategy. Kubernetes creates new pods a
 few at a time and only removes an old pod once a new one is Ready, so the

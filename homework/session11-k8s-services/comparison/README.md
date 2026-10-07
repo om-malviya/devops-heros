@@ -1,6 +1,6 @@
 # Kubernetes Object Comparison
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This is Task 2 of Session 11. Commands reference the objects from Session 10
 (`namespace s10`) and this session (`namespace s11`).

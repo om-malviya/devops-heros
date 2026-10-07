@@ -1,6 +1,6 @@
 # Session 19 – Cloud & Terraform in Action
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Task: Build an end-to-end cloud infrastructure project using Terraform
 

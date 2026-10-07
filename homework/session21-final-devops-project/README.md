@@ -1,5 +1,5 @@
 # Session 21 – Final DevOps Project & Troubleshooting
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This folder is my end-to-end capstone: the **TaskBoard** application (React + FastAPI + PostgreSQL) carried from a
 laptop through Git, CI, security gates, container registry, Terraform-provisioned EKS, Helm, monitoring and GitOps,

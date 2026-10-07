@@ -1,6 +1,6 @@
 # Task 2: Troubleshoot Common Issues
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 One folder per issue. Every folder contains `broken.yaml`, `fixed.yaml` and a `README.md` that follows the same six steps from the spec: **identify, investigate, root cause, fix, verify, document**, with captured before/after output from a single-node k3s cluster (Kubernetes v1.35, arm64).
 

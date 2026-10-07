@@ -1,6 +1,6 @@
 # terraform-aws-infra – quick start
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 End-to-end Terraform project for Session 19: VPC → public subnet → Internet Gateway → route table →
 security group → EC2 (Amazon Linux 2023 + nginx) → S3 bucket. The full write-up (architecture,

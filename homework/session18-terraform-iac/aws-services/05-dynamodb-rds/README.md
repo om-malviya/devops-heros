@@ -1,6 +1,6 @@
 # 05 – DynamoDB & RDS – Database Services
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 AWS offers two very different managed database families. **DynamoDB** is a serverless NoSQL
 key-value/document store; **RDS** runs classic relational engines (MySQL, PostgreSQL, …) on managed

@@ -1,6 +1,6 @@
 # Issue: Pod networking (wrong containerPort/targetPort, NetworkPolicy deny)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Here DNS works and the Service has endpoints, but connections still fail. Two separate bugs are stacked in `broken.yaml` so I can show how to tell them apart:
 

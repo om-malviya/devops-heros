@@ -1,6 +1,6 @@
 # 03 – LoadBalancer
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 `type: LoadBalancer` builds on NodePort and ClusterIP, then asks an external
 controller for a public (or at least node-external) IP. On a cloud this is an

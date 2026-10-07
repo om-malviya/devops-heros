@@ -1,6 +1,6 @@
 # Task 2 – Secret
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 A Secret is the Kubernetes object for sensitive values (passwords, tokens, keys). Values are stored
 base64-encoded, injected into Pods as environment variables or files, and protected by RBAC rather

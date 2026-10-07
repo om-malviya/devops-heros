@@ -1,6 +1,6 @@
 # Issue: Pending
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 `Pending` means the Pod exists in the API but **no node has accepted it yet**. `NODE` is `<none>` in `-o wide`. Kubelet has not even started, so there are no container events, no logs - only the scheduler's `FailedScheduling` events.
 

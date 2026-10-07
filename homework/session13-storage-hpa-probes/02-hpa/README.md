@@ -1,6 +1,6 @@
 # Task 2 – HPA Hands-on
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 The HorizontalPodAutoscaler watches the average CPU of a Deployment's pods (via metrics-server) and
 changes `replicas` to keep it near a target. Here: target 50% of the requested 100m, between 1 and 5

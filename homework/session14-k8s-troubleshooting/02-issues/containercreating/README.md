@@ -1,6 +1,6 @@
 # Issue: ContainerCreating (stuck)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 `ContainerCreating` is a normal transient state: the Pod is scheduled and kubelet is pulling images and setting up volumes/network. It becomes an issue when it **stays** there. The usual reason is a volume that cannot be mounted: a ConfigMap/Secret that does not exist.
 

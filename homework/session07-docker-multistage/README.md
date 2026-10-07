@@ -1,5 +1,5 @@
 # Session 07 – Docker Multi-Stage Build
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Task 1: Run Multi-Stage Dockerfile
 
@@ -120,7 +120,7 @@ The `PORTS` column `0.0.0.0:8080->8080/tcp` confirms the app is served on port 8
 ## Task 2: Documentation
 
 * Name: **Om Malviya**
-* Enrollment number: **24BCS10448**
+* Roll No (enrollment number): **24BCS10448**
 * Output showing the application running successfully: the `curl http://localhost:8080` block in Task 1 (`<h1>Hello World from Docker multi-stage build</h1>`).
 * Output of `docker ps` showing the running container on port 8080: the `docker ps` block in Task 1.
 

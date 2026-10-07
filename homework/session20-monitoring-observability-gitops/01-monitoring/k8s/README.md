@@ -1,5 +1,5 @@
 # Monitoring on Kubernetes with kube-prometheus-stack
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 The Docker Compose stack in the parent folder is good for learning. On a cluster the
 same components come as one Helm chart, `kube-prometheus-stack`, which installs the

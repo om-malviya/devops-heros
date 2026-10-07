@@ -1,6 +1,6 @@
 # 04 – Recreate Deployment
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 With `strategy.type: Recreate` the Deployment scales the old ReplicaSet to 0
 and waits until every old pod is gone before scaling the new ReplicaSet up.

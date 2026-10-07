@@ -1,6 +1,6 @@
 # Task 5 – Troubleshooting
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 I built three deliberately broken manifests, each reproducing a mistake that the course's
 `troubleshooting/` material and the lab warn about, and worked through them with the same loop every

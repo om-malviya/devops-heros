@@ -1,6 +1,6 @@
 # Pod Lifecycle Lab
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Twelve small Pods, each engineered to land in one lifecycle situation. All of
 them are in namespace `s10` and carry the label `lab=pod-lifecycle`.

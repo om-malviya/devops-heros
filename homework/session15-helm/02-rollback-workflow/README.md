@@ -1,6 +1,6 @@
 # Task 2: Helm Rollback Workflow
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ```text
 Install (rev 1)  →  Upgrade (rev 2)  →  Verify  →  Upgrade again (rev 3)  →  Verify  →  Rollback to 2 (rev 4)  →  Verify

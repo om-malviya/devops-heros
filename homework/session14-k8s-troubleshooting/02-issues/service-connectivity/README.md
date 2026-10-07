@@ -1,6 +1,6 @@
 # Issue: Service connectivity (selector mismatch, no endpoints)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 The Pods are healthy, the Service exists, but requests to the Service fail. In my experience this is almost always a mismatch between the Service `selector` and the Pod labels, which shows up as an empty endpoint list.
 

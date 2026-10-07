@@ -1,6 +1,6 @@
 # 03 – Canary Deployment
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 A small number of pods run the new version alongside the stable version. One
 Service selects both sets, so the share of traffic the canary receives equals

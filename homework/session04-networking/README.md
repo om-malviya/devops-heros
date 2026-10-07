@@ -1,5 +1,5 @@
 # Session 04 – Networking
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 All commands in Task 2 were really executed on my laptop (macOS, Wi-Fi `en0`) on 2026-10-07.
 For privacy I replaced MAC addresses with `xx:xx:xx:xx:xx:xx` and my public IP with the

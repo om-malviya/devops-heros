@@ -1,5 +1,5 @@
 # Session 01 – DevOps Engineer Roadmap
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Session 1 has no formal homework task in the spec. The course folder
 (`session1-devops-engineer-roadmap/`) contains `session1.md` (a title line) and

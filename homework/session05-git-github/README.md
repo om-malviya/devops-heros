@@ -1,6 +1,6 @@
 # Session 05 – Git & GitHub
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Both tasks were performed for real in a throwaway repository created by `git-practice.sh` (in this
 folder). The script prints every command before running it (`$ ...`), so the blocks below are the

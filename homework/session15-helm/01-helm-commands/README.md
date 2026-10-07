@@ -1,6 +1,6 @@
 # Task 1: Helm Commands
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 For every Helm command covered in the session: the command, what it does, and the output. I practised with the chart scaffolded by `helm create` and with the Bitnami repository, always in namespace `s15` on a single-node k3s cluster (Kubernetes v1.35).
 

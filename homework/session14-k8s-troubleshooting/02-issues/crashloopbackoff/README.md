@@ -1,6 +1,6 @@
 # Issue: CrashLoopBackOff
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 `CrashLoopBackOff` is a **symptom**: the container starts, exits with an error, kubelet restarts it, it exits again, and kubelet waits longer and longer between restarts (10s, 20s, 40s ... up to 5 minutes).
 

@@ -1,5 +1,5 @@
 # Session 20 – Task 3: GitOps demo with Argo CD
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Task 3: GitOps
 Learn: what is GitOps, Git as the source of truth, declarative configuration, continuous reconciliation, GitOps workflow, Kubernetes + GitOps.

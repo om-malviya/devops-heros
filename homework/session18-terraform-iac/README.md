@@ -1,6 +1,6 @@
 # Session 18 – Terraform & Infrastructure as Code
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Infrastructure as Code means describing cloud resources in version-controlled files and letting a
 tool (Terraform) create, change and delete them. In this session I wrote a small Terraform project

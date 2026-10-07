@@ -1,6 +1,6 @@
 # Task 3: Mini Project – Package and Deploy the Notes App with Helm
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 The course mini project asks me to write a chart `notes-chart` from scratch (an nginx Pod that stands in for a Notes web app), with a `values.yaml` for development and a `values-prod.yaml` for production, then install, upgrade to production values, check the history, simulate a bad upgrade, roll back and clean up. I use namespace `s15` on a single-node k3s cluster (Kubernetes v1.35, Helm v4.3.0).
 

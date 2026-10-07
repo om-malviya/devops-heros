@@ -1,6 +1,6 @@
 # Task 3: Mini Project – Kubernetes Troubleshooting Challenge
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Problem statement
 

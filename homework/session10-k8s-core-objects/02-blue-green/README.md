@@ -1,6 +1,6 @@
 # 02 – Blue-Green Deployment
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Two full copies of the application run side by side. The Service selector
 points at exactly one of them; switching versions is a single selector patch,

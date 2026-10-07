@@ -1,6 +1,6 @@
 # Session 11 – Kubernetes Networking & Services
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 All manifests in this session are namespaced to `s11` so the whole lab can be
 applied with `./deploy-all.sh` and removed with `./cleanup.sh`. Every block

@@ -1,6 +1,6 @@
 # Session 03 – Shell Scripting
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## Task: System Information Script
 

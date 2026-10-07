@@ -1,6 +1,6 @@
 # 05 – Headless Service
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 A headless Service (`clusterIP: None`) allocates no virtual IP and
 programs no kube-proxy rules. DNS returns the pod IPs directly, and when the

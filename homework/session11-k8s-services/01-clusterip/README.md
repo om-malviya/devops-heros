@@ -1,6 +1,6 @@
 # 01 – ClusterIP
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ClusterIP is the default Service type. It gives a set of pods one stable
 virtual IP and one DNS name that only work from inside the cluster.

@@ -1,6 +1,6 @@
 # Issue: DNS (wrong Service name / namespace, checking CoreDNS)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Inside the cluster every Service gets a DNS name:
 

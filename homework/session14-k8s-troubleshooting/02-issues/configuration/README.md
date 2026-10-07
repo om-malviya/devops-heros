@@ -1,6 +1,6 @@
 # Issue: Configuration (bad env var reference -> CreateContainerConfigError)
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 When a container's environment references a ConfigMap key or Secret that does not exist, kubelet cannot even build the container configuration. The Pod is scheduled and the image is pulled, but the status is `CreateContainerConfigError` and it never starts. This is different from `ContainerCreating` (volume problem) and from `CrashLoopBackOff` (the app started and crashed).
 

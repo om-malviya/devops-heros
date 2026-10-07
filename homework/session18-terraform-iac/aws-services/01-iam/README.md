@@ -1,6 +1,6 @@
 # 01 – IAM (Identity and Access Management) – Governance
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 ## What is IAM?
 

@@ -1,5 +1,5 @@
 # Session 02 – Linux
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Environment used for the hands-on parts: macOS (Darwin 25.2, arm64) with the BSD userland for Task 1
 and the cheat-sheet practice, and an Ubuntu 24.04 LTS VM (arm64, systemd; the Colima VM on the same

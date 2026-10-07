@@ -1,6 +1,6 @@
 # Probes – liveness, readiness, startup
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 A Pod can be `Running` while the application inside is broken. Probes let the kubelet ask the app
 three questions. Examples adapted from the course (`nginx:alpine`, namespace `s13`).

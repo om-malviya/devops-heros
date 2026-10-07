@@ -1,6 +1,6 @@
 # Session 13 – Kubernetes Storage, HPA & Probes
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Parts 01-03 live in namespace `s13`; the mini project uses the namespace the course defines,
 `production-webapp`. Target cluster is k3s (default StorageClass `local-path`, metrics-server bundled);

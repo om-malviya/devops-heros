@@ -1,6 +1,6 @@
 # Session 10 – Kubernetes Pods, ReplicaSets & Deployments
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Everything in this session runs in the namespace `s10` so it can be created
 and removed as one unit. Every output block labelled **Output (captured

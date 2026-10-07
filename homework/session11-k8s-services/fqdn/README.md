@@ -1,6 +1,6 @@
 # FQDN in Kubernetes
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This is Task 3 of Session 11. Commands use the `client` pod and Services from
 this session (namespace `s11`) and from Session 10 (namespace `s10`).

@@ -1,5 +1,5 @@
 # Session 15 – Helm
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Helm is the package manager for Kubernetes: one **chart** (templates + default values) is rendered with different **values** into a **release** per environment, and every install/upgrade/rollback is tracked as a revision.
 

@@ -1,5 +1,5 @@
 # Session 08 – Docker Networking & Volumes
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 I ran every step on my Mac (Apple Silicon) with Docker 29 running in a Colima VM on 2026-10-07; every command is also kept in a runnable script (`task1-networking.sh`, `task2-host-network.sh`, `task3-bind-mount.sh`, `cleanup.sh`) and the outputs below are labelled **Output (captured 2026-10-07)**. The scripts are idempotent: each one removes anything left over from a previous run before starting. One practical change: I publish the frontend on host port **8091** (not 8081) because port 8081 was already taken by another container on my machine while I was testing.
 

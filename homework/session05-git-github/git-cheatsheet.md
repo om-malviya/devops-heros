@@ -1,6 +1,6 @@
 # Git Cheat Sheet
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Compiled from the links in `session5-git-github/resources.md`:
 

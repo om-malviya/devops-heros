@@ -1,6 +1,6 @@
 # Session 12 – Kubernetes Ingress, ConfigMaps & Secrets
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 All resources live in namespace `s12`. Everything was written for a k3s cluster (Traefik ingress
 controller installed by default) and also works on minikube after `minikube addons enable ingress`.

@@ -1,6 +1,6 @@
 # Issue: ImagePullBackOff
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Kubernetes could not download the container image. After the first failures (`ErrImagePull`) kubelet backs off and the Pod shows `ImagePullBackOff`. The container never starts, so there are **no logs** to read; the answer is always in the Events.
 

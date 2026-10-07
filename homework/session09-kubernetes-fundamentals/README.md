@@ -1,5 +1,5 @@
 # Session 09 – Kubernetes Fundamentals
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Resources from `session9-k8s/Readme.md`: the Kubernetes Basics tutorial
 (kubernetes.io/docs/tutorials/kubernetes-basics/), the minikube macOS arm64 install guide

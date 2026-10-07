@@ -1,6 +1,6 @@
 # Task 1: Kubernetes Troubleshooting Commands
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 This folder is my hands-on practice of the `kubectl` commands I need when something is wrong in a cluster.
 Everything runs in the `s14` namespace. I use two demo manifests:

@@ -1,6 +1,6 @@
 # 02 – NodePort
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 NodePort opens the same high port (30000–32767) on every node and forwards
 it to a ClusterIP that is created underneath. It is the simplest way to reach

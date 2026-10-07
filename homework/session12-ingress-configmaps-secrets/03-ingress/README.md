@@ -1,6 +1,6 @@
 # Task 3 – Ingress
 
-Student: Om Malviya | Enrollment No: 24BCS10448
+Student: Om Malviya | Roll No: 24BCS10448
 
 Two tiny HTTP apps (`hashicorp/http-echo`, multi-arch) are exposed through ClusterIP Services and one
 Ingress routes `demo.local/app1` and `demo.local/app2` to them. One entry point, path-based routing.
