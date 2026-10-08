@@ -1,6 +1,6 @@
 # Trivy configuration shared by the filesystem (SCA) scan and the image scan.
-# Local:  trivy --config security/trivy.yaml fs .
-#         trivy --config security/trivy.yaml image session17-devsecops-api:local
+# Local:  trivy --config security/trivy.yaml --ignorefile security/.trivyignore fs .
+#         trivy --config security/trivy.yaml --ignorefile security/.trivyignore image session17-devsecops-api:local
 severity:
   - CRITICAL
   - HIGH
@@ -9,7 +9,9 @@ exit-code: 1          # fail the step when a finding matches the severity filter
 # silently ignores it and the gate fails on CVEs that have no fix yet (found 2026-10-07).
 vulnerability:
   ignore-unfixed: true  # do not block on CVEs that have no fix available yet
-ignorefile: security/.trivyignore
+# The accepted-risk list is passed explicitly (CLI: --ignorefile security/.trivyignore,
+# CI: the action's `trivyignores:` input). A relative `ignorefile:` here broke in CI because
+# composite actions run from the repository root, not from the project folder (found 2026-10-08).
 scan:
   scanners:
     - vuln

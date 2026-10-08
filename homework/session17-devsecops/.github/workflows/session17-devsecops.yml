@@ -157,6 +157,7 @@ jobs:
           scan-type: fs
           scan-ref: ${{ env.PROJECT_DIR }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
+          trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
           format: table
           exit-code: "1"
           severity: CRITICAL,HIGH
