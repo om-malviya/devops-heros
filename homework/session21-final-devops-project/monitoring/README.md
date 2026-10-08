@@ -43,7 +43,7 @@ $ curl -s 'localhost:8290/api/v1/query?query=histogram_quantile(0.95, sum by (le
 $ curl -s localhost:8290/api/v1/rules | <groups taskboard.*>
 taskboard.availability  TaskboardBackendDown, TaskboardPodCrashLooping, TaskboardPodNotReady      state=inactive
 taskboard.traffic       TaskboardHighErrorRate, TaskboardHighLatencyP95, TaskboardHpaAtMaxReplicas  state=inactive
-$ curl -s -u admin:grafana-demo-admin "localhost:8291/api/search?query=TaskBoard"   # port-forward of the Grafana svc
+$ curl -s -u admin:<GRAFANA_ADMIN_PASSWORD> "localhost:8291/api/search?query=TaskBoard"   # port-forward of the Grafana svc
 TaskBoard - API overview -> /d/taskboard-api/taskboard-api-overview
 ```
 

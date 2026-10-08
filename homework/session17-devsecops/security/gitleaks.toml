@@ -20,6 +20,11 @@ description = "Known safe placeholders"
 paths = [
   '''(^|/)tests/''',
   '''\.md$''',
+  # Session 12 Task 2 intentionally commits a demo Secret whose base64 values decode to
+  # 'demo_user' / 'fake-password-123' / 'demo_db'. The CI gate flagged it on the first run
+  # (kubernetes-secret-yaml + generic-api-key). It is course material, not a credential,
+  # so it is allow-listed by exact path instead of weakening the rules.
+  '''^homework/session12-ingress-configmaps-secrets/02-secret/secret\.yaml$''',
 ]
 regexes = [
   '''replace-with-test-value''',

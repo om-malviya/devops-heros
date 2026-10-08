@@ -83,7 +83,7 @@ to 12 and added a `conftest.py` that isolates them on SQLite, (4) added a Config
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18, Vite 5, nginx-unprivileged 1.30 (alpine, arm64/amd64) |
+| Frontend | React 18, Vite 7, nginx-unprivileged 1.30 (alpine, arm64/amd64) |
 | Backend | Python 3.12, FastAPI 0.142, SQLAlchemy 2.0, Alembic, psycopg 3, prometheus-fastapi-instrumentator, uvicorn |
 | Database | PostgreSQL 16 (alpine) |
 | Tests / quality | pytest 9, ruff |
@@ -800,9 +800,9 @@ $ curl -s localhost:8290/api/v1/rules               # groups taskboard.*
 taskboard.availability   TaskboardBackendDown / TaskboardPodCrashLooping / TaskboardPodNotReady          state=inactive
 taskboard.traffic        TaskboardHighErrorRate / TaskboardHighLatencyP95 / TaskboardHpaAtMaxReplicas    state=inactive
 $ kubectl -n monitoring-s21 port-forward svc/kube-prometheus-stack-grafana 8291:80 &
-$ curl -s -u admin:grafana-demo-admin "localhost:8291/api/search?query=TaskBoard"
+$ curl -s -u admin:<GRAFANA_ADMIN_PASSWORD> "localhost:8291/api/search?query=TaskBoard"
 TaskBoard - API overview -> /d/taskboard-api/taskboard-api-overview        (imported by the sidecar from the ConfigMap)
-$ curl -s -u admin:grafana-demo-admin localhost:8291/api/datasources
+$ curl -s -u admin:<GRAFANA_ADMIN_PASSWORD> localhost:8291/api/datasources
 Prometheus prometheus
 Alertmanager alertmanager
 $ helm uninstall kube-prometheus-stack -n monitoring-s21 && kubectl delete ns monitoring-s21

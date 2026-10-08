@@ -188,7 +188,7 @@ deployment "argocd-server" successfully rolled out
 deployment "argocd-repo-server" successfully rolled out
 partitioned roll out complete: 1 new pods have been updated...
 ==> Initial admin password:
-QpeVnPjO29ABk4RB
+<initial-admin-password>   (redacted; printed by the script, used once to log in, then rotated)
 
 UI:  https://localhost:8080   (user: admin, password above)
 Run: kubectl port-forward svc/argocd-server -n argocd 8080:443

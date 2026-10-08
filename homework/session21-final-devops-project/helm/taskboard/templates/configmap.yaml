@@ -8,6 +8,7 @@ data:
   APP_NAME: {{ .Values.config.appName | quote }}
   APP_ENV: {{ .Values.config.appEnv | quote }}
   LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  CORS_ORIGINS: {{ .Values.config.corsOrigins | quote }}
   BACKEND_HOST: {{ include "taskboard.fullname" . }}-backend
   BACKEND_PORT: {{ .Values.backend.port | quote }}
   POSTGRES_DB: {{ .Values.postgres.database | quote }}

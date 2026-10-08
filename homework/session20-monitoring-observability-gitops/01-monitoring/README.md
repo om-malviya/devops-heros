@@ -496,8 +496,8 @@ Login at http://localhost:3000 (admin / admin). The Prometheus datasource and th
 
 ```bash
 curl -s localhost:3000/api/health
-curl -s -u admin:admin 'localhost:3000/api/search?query=Session' | jq -r '.[] | "\(.title)\t\(.uid)\t\(.type)\t\(.folderTitle)"'
-curl -s -u admin:admin localhost:3000/api/datasources | jq -r '.[] | "\(.name)\t\(.type)\t\(.url)\t\(.isDefault)"'
+curl -s -u admin:<GRAFANA_ADMIN_PASSWORD> 'localhost:3000/api/search?query=Session' | jq -r '.[] | "\(.title)\t\(.uid)\t\(.type)\t\(.folderTitle)"'
+curl -s -u admin:<GRAFANA_ADMIN_PASSWORD> localhost:3000/api/datasources | jq -r '.[] | "\(.name)\t\(.type)\t\(.url)\t\(.isDefault)"'
 ```
 
 Output (captured 2026-10-07)

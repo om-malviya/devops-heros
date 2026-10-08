@@ -10,6 +10,7 @@ data:
   APP_NAME: "TaskBoard API"
   APP_ENV: "kubernetes"
   LOG_LEVEL: "info"
+  CORS_ORIGINS: "http://taskboard.local"
   # Frontend nginx template values
   BACKEND_HOST: "taskboard-backend"
   BACKEND_PORT: "8000"

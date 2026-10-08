@@ -84,3 +84,20 @@ def test_stats_counts_match_list(client, task):
     assert stats["total"] == len(tasks)
     assert stats["done"] == len([t for t in tasks if t["status"] == "DONE"])
     assert stats["total"] == stats["todo"] + stats["inProgress"] + stats["done"]
+
+
+def test_cors_allows_only_configured_origins(client):
+    """Regression test for the Semgrep finding python.fastapi.security.wildcard-cors:
+    the API must echo an allowed origin and must NOT answer with '*' or echo unknown origins."""
+    allowed = client.options(
+        "/api/tasks",
+        headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "GET"},
+    )
+    assert allowed.status_code == 200
+    assert allowed.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+    denied = client.options(
+        "/api/tasks",
+        headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
+    )
+    assert denied.headers.get("access-control-allow-origin") is None

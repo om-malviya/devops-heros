@@ -49,6 +49,9 @@ config:
   appName: "TaskBoard API"
   appEnv: "kubernetes"
   logLevel: "info"
+  # Browser origins allowed by the API (comma-separated). Same-origin traffic through the
+  # frontend nginx proxy never needs CORS; this is for a separately hosted UI or the Vite dev server.
+  corsOrigins: "http://taskboard.local"
 
 postgres:
   enabled: true             # set false to use an external database (e.g. RDS) via externalDatabaseUrl

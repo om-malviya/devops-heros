@@ -27,6 +27,7 @@ services:
     environment:
       APP_ENV: compose
       LOG_LEVEL: info
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       DATABASE_URL: postgresql+psycopg://taskboard:taskboard-local-only@postgres:5432/taskboard
     depends_on:
       postgres:

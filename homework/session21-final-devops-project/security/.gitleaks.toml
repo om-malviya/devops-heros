@@ -17,11 +17,15 @@ description = "Documented demo placeholders"
 regexTarget = "line"      # match the allow-list regexes against the whole line, not only the captured secret
 paths = [
   '''kubernetes/02-secret\.example\.yaml''',
+  # The repo-wide CI scan also sees Session 12's intentionally committed demo Secret
+  # (values decode to demo_user / fake-password-123 / demo_db). Course material, not a credential.
+  '''^homework/session12-ingress-configmaps-secrets/02-secret/secret\.yaml$''',
   '''terraform/terraform\.tfvars\.example''',
   '''application/backend/\.env\.example''',
 ]
 regexes = [
   '''changeme-demo-password''',
+  '''ZmFrZS1wYXNzd29yZC0xMjM=''',   # base64('fake-password-123') quoted in the Session 12 READMEs
   '''taskboard-local-only''',
   '''<DB_PASSWORD>''',
   '''<STRONG_PASSWORD>''',

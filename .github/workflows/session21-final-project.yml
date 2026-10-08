@@ -150,7 +150,7 @@ jobs:
         run: docker build -f docker/frontend.Dockerfile -t "$FRONTEND_IMAGE:${{ github.sha }}" application/frontend
 
       - name: "Trivy scan backend (gate: HIGH/CRITICAL fixable CVEs fail the job)"
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@v0.30.0
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
@@ -158,7 +158,7 @@ jobs:
           format: table
           exit-code: "1"
       - name: Trivy scan frontend
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@v0.30.0
         with:
           image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
@@ -167,7 +167,7 @@ jobs:
           exit-code: "1"
       - name: Trivy SARIF report (backend) for the Security tab
         if: always()
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@v0.30.0
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
