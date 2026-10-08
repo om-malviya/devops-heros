@@ -151,7 +151,7 @@ jobs:
           pip-audit -r requirements.txt --strict --desc
           pip-audit -r requirements.txt -f json -o reports/pip-audit.json || true
       - name: Trivy filesystem scan (deps, misconfig, secrets)
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           scan-type: fs
           scan-ref: ${{ env.PROJECT_DIR }}
@@ -256,7 +256,7 @@ jobs:
       - name: Load image
         run: docker load -i dist/image.tar
       - name: Trivy image scan - human readable table (informational)
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: ${{ env.IMAGE_REF }}
           format: table
@@ -265,7 +265,7 @@ jobs:
           ignore-unfixed: true
           trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
       - name: Trivy image scan - GATE (fails on CRITICAL/HIGH with a fix)
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: ${{ env.IMAGE_REF }}
           format: sarif

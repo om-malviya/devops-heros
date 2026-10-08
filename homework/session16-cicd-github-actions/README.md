@@ -470,42 +470,52 @@ $ curl -s localhost:8101/health
    check caught it. Clean-up afterwards: `kubectl delete namespace s16`,
    `docker rm -f s16-registry`.
 
-## 4. Expected pipeline output
+## 4. Pipeline output (captured from GitHub Actions)
 
-Actions tab after a push to `main` that touches this folder:
+The fork was pushed on 2026-10-08 and the workflow ran on the first commit that touched this
+folder. Run: https://github.com/om-malviya/devops-heros/actions/runs/37715592913
 
 ```text
-Session 16 - CI/CD Pipeline   #1   main   push
+Output (captured 2026-10-08, GitHub Actions run #37715592913, commit f7d0ed7, trigger: push to main)
+Session 16 - CI/CD Pipeline   ✓ success   1m 29s
 │
-├── ✓ CI - Lint and Test                              45s
-│     ✓ Checkout source code
-│     ✓ Set up Python 3.12            (cache hit: pip)
-│     ✓ Install dependencies
+├── ✓ CI - Lint and Test                              13s   (01:58:57 → 01:59:10 UTC)
 │     ✓ Lint with flake8
-│     ✓ Run unit tests (JUnit + coverage)   "23 passed"
-│     ✓ Upload test report artifact         "Artifact test-report has been successfully uploaded!"
+│     ✓ Run unit tests (JUnit + coverage)   TOTAL  61  7  89%   ·   23 passed in 0.35s
+│     ✓ Upload test report artifact         Artifact test-report has been successfully uploaded! Final size is 1296 bytes.
 │
-├── ✓ Build - Docker image                            1m 10s
-│     ✓ Compute image name (lowercase) and tag
+├── ✓ Build - Docker image                            41s   (01:59:12 → 01:59:53 UTC)
 │     ✓ Set up Docker Buildx
 │     ✓ Build image (not pushed yet)
-│     ✓ Smoke test the container            {"status":"ok"} {"a":10.0,"b":5.0,"op":"add","result":15.0}
-│     ✓ Save image as tar                   -rw-r--r-- 1 runner docker 58M image.tar
+│     ✓ Smoke test the container            {"status":"ok"}
+│                                           {"a":10.0,"b":5.0,"op":"add","result":15.0}
+│     ✓ Save image as tar                   -rw------- 1 runner runner 125M Oct  8 01:59 image.tar
 │     ✓ Upload image artifact
 │
-└── ✓ CD - Push to GHCR and Deploy                    40s
-      ✓ Download image artifact
-      ✓ Load image
-      ✓ Login to GitHub Container Registry  "Login Succeeded!"
-      ✓ Push image (sha + latest tags)      "a1b2c3d: digest: sha256:... size: 1570"
-      ✓ Render Kubernetes manifests          18:          image: ghcr.io/<owner>/session16-calculator-api:a1b2c3d
+└── ✓ CD - Push to GHCR and Deploy                    27s   (01:59:55 → 02:00:22 UTC)
+      ✓ Download image artifact             docker-image (Size: 46247795)
+      ✓ Load image                          Loaded image: ghcr.io/om-malviya/session16-calculator-api:f7d0ed7
+                                            Loaded image: ghcr.io/om-malviya/session16-calculator-api:latest
+      ✓ Login to GitHub Container Registry  Login Succeeded!
+      ✓ Push image (sha + latest tags)      f7d0ed7: digest: sha256:5024064b0f787cbe5979931cec542f6aee652977e9a62936084add7f7c2bc965 size: 2199
+                                            latest:  digest: sha256:5024064b0f787cbe5979931cec542f6aee652977e9a62936084add7f7c2bc965 size: 2199
+      ✓ Render Kubernetes manifests          20:          image: ghcr.io/om-malviya/session16-calculator-api:f7d0ed7
       ✓ Upload rendered manifests
-      ✓ Check whether a KUBE_CONFIG secret is configured   "KUBE_CONFIG secret not set - deployment will be simulated."
-      - Deploy to Kubernetes                 (skipped)
-      ✓ Simulated deploy (no cluster credentials)
+      ✓ Check whether a KUBE_CONFIG secret is configured
+      - Deploy to Kubernetes                 (skipped – no KUBE_CONFIG secret on the fork)
+      ✓ Simulated deploy (no cluster credentials)   ::notice title=Deploy skipped::No KUBE_CONFIG secret. Manifest that would be applied:
 
-Artifacts (3): test-report, docker-image, k8s-manifests
+Artifacts (3 + buildx record): test-report (1.3 kB), docker-image (46 MB), k8s-manifests (843 B)
+Package: ghcr.io/om-malviya/session16-calculator-api  tags: f7d0ed7, latest
 ```
+
+I observed that the only non-green item is the deliberately skipped `Deploy to Kubernetes` step:
+the fork has no `KUBE_CONFIG` secret, so the CD job falls through to the simulated deploy and
+prints the rendered manifest instead, exactly as designed. The image push itself is real: the
+package is visible under the om-malviya account on GHCR with the commit-SHA tag and `latest`.
+The runner also printed two warnings worth knowing: `actions/*@v4` actions are being migrated
+from Node 20 to Node 24, and `ubuntu-latest` moves to Ubuntu 26 from October 2026; neither
+affects the result.
 
 On a pull request: `CI` ✓, `Build` ✓, `CD` skipped (grey). With the intentional bug
 `return a + b + 1`: `CI` ✗ at step "Run unit tests" (`test_add` and
@@ -513,8 +523,9 @@ On a pull request: `CI` ✓, `Build` ✓, `CD` skipped (grey). With the intentio
 
 ## Screenshots
 
-The pipeline runs only after the fork is pushed, so these are the screenshots to capture
-from the GitHub UI; the captured terminal blocks above stand in for them until then.
+The captured terminal blocks stand in for screenshots. Rows 1, 2, 3, 4 and 5 are now backed by
+the real run in section 4 (run 37715592913); rows 6-8 describe views in the GitHub UI that have
+no terminal equivalent.
 
 | # | Screenshot to capture | What it must show | Stand-in in this README |
 |---|---|---|---|
@@ -522,7 +533,7 @@ from the GitHub UI; the captured terminal blocks above stand in for them until t
 | 2 | Run summary page | the graph `CI - Lint and Test → Build - Docker image → CD - Push to GHCR and Deploy`, all green, and the three artifacts at the bottom | section 4 |
 | 3 | `CI` job log, step "Run unit tests" | `23 passed` and the coverage table | captured pytest output in section 2 |
 | 4 | `Build` job log, step "Smoke test the container" | `{"status":"ok"}` and the calc result returned from the container | captured `docker run` + curl output in section 2 |
-| 5 | `CD` job log, step "Push image" | GHCR digest lines for the `:sha` and `:latest` tags | – |
+| 5 | `CD` job log, step "Push image" | GHCR digest lines for the `:sha` and `:latest` tags | section 4 (digest sha256:5024064b…) |
 | 6 | Profile → Packages → `session16-calculator-api` | the image with both tags | – |
 | 7 | A pull request's Checks tab | `CI` and `Build` green, `CD` skipped | – |
 | 8 | A failing run (intentional `a + b + 1`) | red `CI`, `Build`/`CD` not run | – |
