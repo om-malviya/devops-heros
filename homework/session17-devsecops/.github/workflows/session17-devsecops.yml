@@ -313,6 +313,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate results of every required check
+        # This job has no checkout step, so the workflow-level working-directory default
+        # (the project folder) does not exist here - run from the runner workspace instead.
+        # Run #37717867775 failed on exactly that after every scanner had passed.
+        working-directory: ${{ github.workspace }}
         run: |
           echo "| Check        | Result |"
           echo "|--------------|--------|"
