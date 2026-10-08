@@ -9,7 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Dependencies first so the layer is cached while application code changes.
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
+# Upgrade pip first: the pip bundled with the base image carries fixable MEDIUM CVEs (seen by Trivy in CI).
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt \
     && useradd --create-home --uid 10001 --shell /usr/sbin/nologin appuser
 
 COPY alembic.ini ./

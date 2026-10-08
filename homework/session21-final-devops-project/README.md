@@ -25,9 +25,10 @@ cluster: pytest, ruff, bandit, pip-audit, the Vite build, `helm lint`/`helm temp
 (Traefik ingress, `local-path` StorageClass, metrics-server) shared with other work, so the Compose stack, every
 security gate, the raw-manifest and Helm deployments, kube-prometheus-stack, Argo CD and all six troubleshooting
 scenarios ran for real. Two local adaptations apply wherever a cluster command appears below: the images were
-served from a local registry (`localhost:5002/...`) because nothing has been pushed to GHCR yet, and the Ingress
-class was `traefik` instead of `nginx`. Only GitHub Actions/GHCR and AWS/EKS stay labelled **Expected output**
-(no push to GitHub yet, no AWS account).
+served from a local registry (`localhost:5002/...`) because the images had not been pushed to GHCR at that point, and the Ingress
+class was `traefik` instead of `nginx`. Only the Argo CD sync of the pushed repo and AWS/EKS stay labelled **Expected output**
+(the Argo CD demo was captured before the fork existed on GitHub; there is no AWS account). The GitHub Actions
+runs themselves are captured in Task 4, including the three failed runs that preceded the green one.
 
 ---
 
@@ -577,15 +578,38 @@ commit SHA so production can always be traced back to a commit; pushes are skipp
 job is a no-op with a message when no kubeconfig secret exists, because in the GitOps flow Argo CD deploys instead.
 
 ```text
-Expected output (GitHub Actions run summary)
-✓ Backend lint + pytest            1m 02s   12 passed
-✓ Frontend build                   0m 41s
-✓ SAST (bandit + semgrep)          1m 15s   0 findings
-✓ SCA (pip-audit + npm audit)      0m 58s   No known vulnerabilities found
-✓ Secret scan (gitleaks)           0m 20s   no leaks found
-✓ Docker build + Trivy gate + push 3m 40s   taskboard-backend: 0 HIGH/CRITICAL (fixed) · pushed ghcr.io/om-malviya/taskboard-backend:3f2a9c1
-✓ Helm deploy                      1m 10s   deployment "taskboard-taskboard-backend" successfully rolled out
+Output (captured 2026-10-08, GitHub Actions run #37716788780 on commit 401520e, trigger: push to main)
+https://github.com/om-malviya/devops-heros/actions/runs/37716788780
+✓ Backend lint + pytest             20s   All checks passed! · 13 passed, 1 warning in 0.15s
+✓ Frontend build                    22s   artifact frontend-dist (50.7 kB)
+✓ SAST (bandit + semgrep)           22s   Bandit: No issues identified. · Semgrep: Ran 222 rules on 18 files: 0 findings.
+✓ SCA (pip-audit + npm audit)       21s   No known vulnerabilities found · found 0 vulnerabilities
+✓ Secret scan (gitleaks)             5s   no leaks found
+✓ Docker build + Trivy gate + push  1m55s taskboard-backend (debian 13.7): Vulnerabilities 0 · taskboard-frontend (alpine 3.24.2): 0
+                                          Login Succeeded! · pushed ghcr.io/om-malviya/taskboard-backend:401520e8… (digest sha256:4977cc43…)
+                                          and ghcr.io/om-malviya/taskboard-frontend:401520e8… (digest sha256:071fe18c…), plus :latest
+✓ Helm deploy                        5s   KUBE_CONFIG_DATA secret not set - skipping deployment (GitOps/Argo CD can take over instead).
+Artifacts: pytest-report, frontend-dist, gitleaks-results.sarif · Security tab: Trivy SARIF uploaded (category trivy-backend)
 ```
+
+#### What it took to get there – the CI run history
+
+The pipeline is only useful if it is allowed to fail, and it did. Four pushes were needed before
+the run above went green; each failure was a real gate doing its job or a real infrastructure
+problem, and each fix is in the git history of this folder:
+
+| Run | Commit | Result | What failed | Fix |
+|---|---|---|---|---|
+| [#37715592886](https://github.com/om-malviya/devops-heros/actions/runs/37715592886) | f7d0ed7 (first push) | ✗ | **Semgrep**: `python.fastapi.security.wildcard-cors` – `allow_origins=["*"]` in `app/main.py`. **Gitleaks**: 9 hits – Grafana/Argo CD lab passwords quoted in captured README output and the Session 12 demo Secret. **npm audit**: `vite <=6.4.2` / `esbuild <=0.24.2` (1 high, 1 moderate). | CORS origins moved to the `CORS_ORIGINS` setting (ConfigMap/Helm/Compose) with a regression test; passwords redacted from the READMEs; Session 12's demo Secret allow-listed by exact path with a justification; Vite 5 → 7 and `@vitejs/plugin-react` 4 → 5 (`npm audit`: 0). |
+| [#37716305366](https://github.com/om-malviya/devops-heros/actions/runs/37716305366) | 78e2c3a | ✗ | All five scanners green. `aquasecurity/trivy-action@0.30.0` could not be resolved: its internal `setup-trivy@v0.2.2` tag no longer exists. | Action pinned to `v0.33.1`, which references `setup-trivy` by commit SHA. |
+| [#37716517494](https://github.com/om-malviya/devops-heros/actions/runs/37716517494) | 3f664e5 | ✗ | Trivy install step exited 1: the action's default Trivy release `v0.65.0` has been deleted upstream (GitHub returns 404 for the tag). | `trivy-action@v0.36.0` with an explicit `version: v0.75.0` (the same release used for the local scans). |
+| [#37716788780](https://github.com/om-malviya/devops-heros/actions/runs/37716788780) | 401520e | ✓ | – | – |
+
+I observed two lessons here that the local runs could not teach: third-party actions must be
+pinned to something immutable (a commit SHA or an explicit tool version), because tags and
+releases disappear; and a repo-wide secret scanner will find the demo credentials that earlier
+sessions deliberately committed, so every exception has to be written down next to the rule.
+
 
 ---
 
@@ -736,12 +760,17 @@ exit=0
 
 (`--skip-dirs terraform` only because Trivy tries to download the AWS modules to evaluate them and this machine has
 no network access to the Terraform registry; the Terraform code is validated separately in Task 2.) The CI gate
-result for the GHCR-tagged images is therefore expected to be the same as the local one:
+result for the GHCR-tagged images matched the local one:
 
 ```text
-Expected output (Trivy in GitHub Actions, backend image)
-ghcr.io/om-malviya/taskboard-backend:3f2a9c1 (debian 13.7)
-Total: 0 (HIGH: 0, CRITICAL: 0)
+Output (captured 2026-10-08, run #37716788780, step "Trivy scan backend (gate: HIGH/CRITICAL fixable CVEs fail the job)")
+Running Trivy with options: trivy image ghcr.io/om-malviya/taskboard-backend:401520e8ec718882ce11d002ee1e17d1fff843a9
+Report Summary
+│ Target                                                                        │ Type       │ Vulnerabilities │ Secrets │ Misconfigurations │
+│ ghcr.io/om-malviya/taskboard-backend:401520e8… (debian 13.7)                  │ debian     │ 0               │ -       │ -                 │
+│ usr/local/lib/python3.12/site-packages/fastapi-0.142.2.dist-info/METADATA     │ python-pkg │ 0               │ -       │ -                 │
+│ … (one row per installed Python package, all 0)                               │            │                 │         │                   │
+step "Trivy scan frontend": ghcr.io/om-malviya/taskboard-frontend:401520e8… (alpine 3.24.2)  Vulnerabilities 0
 ```
 
 ---
@@ -939,7 +968,7 @@ in Task 6; the scenario manifests are now generated from the real ones so they d
 ### Screenshots
 
 The terminal outputs in this README stand in for the screenshots. Captured outputs are real (Docker + k3s on
-2026-10-08); the two rows marked expected need a GitHub push / an AWS account.
+2026-10-08, GitHub Actions on 2026-10-08); only the Argo CD and AWS rows still need an external environment.
 
 | Screenshot the rubric asks for | Stand-in in this README |
 |--------------------------------|-------------------------|
@@ -948,7 +977,7 @@ The terminal outputs in this README stand in for the screenshots. Captured outpu
 | `docker compose up --build` | Task 1, Docker setup (captured): three containers healthy, POST/GET/stats, `/metrics` |
 | `terraform plan` / apply / destroy, AWS console VPC + EKS | Task 2 (captured init+validate) and `terraform/README.md` (expected plan/apply/destroy) |
 | `kubectl get pods/svc`, `helm list`, app via Ingress | Task 3 (captured): `get all,ingress,hpa,pvc`, probe lines, read-only root FS, `curl -H Host:` through Traefik, `helm list/history/rollback` |
-| GitHub Actions green run, GHCR packages with SHA tags | Task 4 (expected run summary) |
+| GitHub Actions green run, GHCR packages with SHA tags | Task 4 (captured run #37716788780 and the run-history table; both images pushed to GHCR with the SHA tag and `latest`) |
 | Trivy scan output | Task 5 (captured): Trivy image/fs, Gitleaks, Semgrep - first run with 4 failing gates and the clean re-run |
 | `/metrics`, Prometheus targets UP, Grafana panel | Task 6 (captured): backend targets UP, PromQL rate/p95, 6 alert rules loaded, dashboard imported by the sidecar |
 | Argo CD Synced/Healthy | Task 6 (captured `Unknown` + `ComparisonError: authentication required` before the push; Synced/Healthy expected after) |

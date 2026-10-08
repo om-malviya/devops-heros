@@ -268,18 +268,34 @@ jobs:
           ignore-unfixed: true
           trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
       - name: Trivy image scan - GATE (fails on CRITICAL/HIGH with a fix)
+        # The gate uses table output on purpose. With `format: sarif` the action disables the
+        # severity filter (so the Security tab receives every finding) and `exit-code: 1` then
+        # fires on MEDIUM CVEs too - that is exactly what failed run #37717126323 on five
+        # MEDIUM pip CVEs. Gate here, report separately below.
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.75.0   # pin the scanner; the action default (v0.65.0/v0.70.0) was removed upstream and broke the install
           image-ref: ${{ env.IMAGE_REF }}
-          format: sarif
-          output: trivy-image.sarif
+          format: table
           exit-code: "1"
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
         env:
           TRIVY_SKIP_DB_UPDATE: "true"   # DB already downloaded by the step above
+      - name: Trivy image scan - SARIF report for the Security tab (all severities, never blocks)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.75.0
+          image-ref: ${{ env.IMAGE_REF }}
+          format: sarif
+          output: trivy-image.sarif
+          exit-code: "0"
+          ignore-unfixed: true
+          trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
+        env:
+          TRIVY_SKIP_DB_UPDATE: "true"
       - name: Upload Trivy SARIF to code scanning
         if: always()
         uses: github/codeql-action/upload-sarif@v3
