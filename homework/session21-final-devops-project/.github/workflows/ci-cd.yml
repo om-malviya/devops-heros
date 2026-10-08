@@ -140,16 +140,18 @@ jobs:
         run: docker build -f docker/frontend.Dockerfile -t "$FRONTEND_IMAGE:${{ github.sha }}" application/frontend
 
       - name: "Trivy scan backend (gate: HIGH/CRITICAL fixable CVEs fail the job)"
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
+          version: v0.75.0   # pin the scanner; the action default (v0.65.0/v0.70.0) was removed upstream and broke the install
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
           trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
           format: table
           exit-code: "1"
       - name: Trivy scan frontend
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
+          version: v0.75.0   # pin the scanner; the action default (v0.65.0/v0.70.0) was removed upstream and broke the install
           image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
           trivyignores: ${{ env.PROJECT_DIR }}/security/.trivyignore
@@ -157,8 +159,9 @@ jobs:
           exit-code: "1"
       - name: Trivy SARIF report (backend) for the Security tab
         if: always()
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
+          version: v0.75.0   # pin the scanner; the action default (v0.65.0/v0.70.0) was removed upstream and broke the install
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           trivy-config: ${{ env.PROJECT_DIR }}/security/trivy.yaml
           format: sarif
