@@ -17,10 +17,13 @@ RUN apt-get update \
 WORKDIR /app
 
 COPY requirements.txt .
-# Upgrade pip first: the pip bundled with python:3.12-slim (25.0.1) carried five fixable MEDIUM CVEs
-# (CVE-2025-8869, CVE-2026-13346, CVE-2026-3219, CVE-2026-6357, CVE-2026-8643) found by Trivy in CI run #37717126323.
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r requirements.txt
+# Install the pinned dependencies, then remove the package manager from the runtime image.
+# Trivy in CI (run #37717126323) flagged the pip bundled with python:3.12-slim (25.0.1) for five
+# fixable MEDIUM CVEs; upgrading pip to 26.x (run #37717503027) replaced them with four HIGH CVEs in
+# pip's vendored msgpack/urllib3/setuptools. A runtime image never needs pip, so the smallest attack
+# surface is to uninstall it after the dependencies are in place.
+RUN pip install --no-cache-dir -r requirements.txt \
+ && python -m pip uninstall -y pip setuptools wheel
 
 COPY app ./app
 

@@ -9,9 +9,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Dependencies first so the layer is cached while application code changes.
 COPY requirements.txt .
-# Upgrade pip first: the pip bundled with the base image carries fixable MEDIUM CVEs (seen by Trivy in CI).
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r requirements.txt \
+# Install the pinned dependencies, then remove pip from the runtime image: the bundled pip carried
+# MEDIUM CVEs and the newest pip vendors msgpack/urllib3/setuptools with HIGH CVEs (both seen by the
+# Trivy gate in CI). A runtime container never needs a package manager.
+RUN pip install --no-cache-dir -r requirements.txt \
+    && python -m pip uninstall -y pip setuptools wheel \
     && useradd --create-home --uid 10001 --shell /usr/sbin/nologin appuser
 
 COPY alembic.ini ./
