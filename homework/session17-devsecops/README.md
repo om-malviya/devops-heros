@@ -701,45 +701,73 @@ the image filesystem is refused because of `readOnlyRootFilesystem: true` – on
 4. Optional secrets (**Settings → Secrets and variables → Actions**): `KUBE_CONFIG` = `base64 < ~/.kube/config | tr -d '\n'` for a reachable cluster; `GITLEAKS_LICENSE` only for organisation repos.
 5. Package `ghcr.io/<owner>/session17-devsecops-api` appears under Profile → Packages after the first push to `main`; set it to public or add an `imagePullSecrets` to the Deployment.
 
-## 5. Expected pipeline output
+## 5. Pipeline output (captured from GitHub Actions)
+
+Run: https://github.com/om-malviya/devops-heros/actions/runs/37718221051
 
 ```text
-Session 17 - DevSecOps Pipeline   #1   main   push
-├── ✓ 1. Build                         20s   build-output artifact
-├── ✓ 2. Unit Test                     30s   "23 passed", coverage 90%
-├── ✓ 3. SAST (Bandit + Semgrep)       50s   "No issues identified." / "Ran 155 rules on 3 files: 0 findings."
-├── ✓ 4. SCA (pip-audit + Trivy fs)    40s   "No known vulnerabilities found" / "Total: 0 (HIGH: 0, CRITICAL: 0)"
-├── ✓ 5. Secret Scan (Gitleaks)        15s   "no leaks found"
-├── ✓ 6. Docker Build                  1m    uid=10001(app) ...
-├── ✓ 7. Image Scan (Trivy)            45s   "Total: 0 (HIGH: 0, CRITICAL: 0)"
-├── ✓ 8. Security Gate                 3s    "Security gate PASSED - image may be published."
-├── ✓ 9. Push Image (GHCR)             25s   "Pushed ghcr.io/<owner>/session17-devsecops-api:a1b2c3d"
-└── ✓ 10. Deploy to Kubernetes         10s   "KUBE_CONFIG secret not set - deployment will be simulated." (or rollout output)
+Output (captured 2026-10-08, GitHub Actions run #37718221051, commit 49fff6d, trigger: push to main)
+Session 17 - DevSecOps Pipeline   ✓ success   3m 01s
+├── ✓ 1. Build                          8s   artifact build-output (2.5 kB)
+├── ✓ 2. Unit Test                     13s   TOTAL 68 7 90% · 23 passed in 0.29s · artifact test-report
+├── ✓ 3. SAST (Bandit + Semgrep)       36s   Bandit: No issues identified. · Semgrep: Ran 155 rules on 3 files: 0 findings. · artifact sast-reports (SARIF uploaded, category semgrep)
+├── ✓ 4. SCA (pip-audit + Trivy fs)    32s   pip-audit: No known vulnerabilities found · Trivy fs: 0 HIGH/CRITICAL, 0 misconfigurations, 0 secrets
+├── ✓ 5. Secret Scan (Gitleaks)         8s   1 commits scanned. · no leaks found
+├── ✓ 6. Docker Build                  42s   smoke test inside the container: uid=10001(app) gid=999(app) · artifact docker-image (46 MB)
+├── ✓ 7. Image Scan (Trivy)            41s   ghcr.io/om-malviya/session17-devsecops-api:49fff6d (debian 13.7)  Vulnerabilities 0  (table + gate + SARIF, category trivy-image)
+├── ✓ 8. Security Gate                  2s   Security gate PASSED - image may be published.
+├── ✓ 9. Push Image (GHCR)             17s   49fff6d: digest: sha256:3a86e7c4f48ca18bc51f518f2d410ea9b6788145a388dd7e0f566c4131130f26 size: 2409
+│                                           latest:  digest: sha256:3a86e7c4f48ca18bc51f518f2d410ea9b6788145a388dd7e0f566c4131130f26 size: 2409
+└── ✓ 10. Deploy to Kubernetes          8s   KUBE_CONFIG secret not set - deployment simulated, rendered manifests uploaded (artifact k8s-manifests)
 
-Artifacts: build-output, test-report, sast-reports, sca-reports, docker-image, k8s-manifests
-Security → Code scanning: 0 open alerts (categories semgrep, trivy-image)
+Artifacts: build-output, test-report, sast-reports, sca-reports, gitleaks-results.sarif, docker-image, k8s-manifests
+Security → Code scanning: categories semgrep and trivy-image, 0 open alerts
 ```
+
+### The run history – eight pushes, seven failures, all of them real
+
+The green run above was the eighth. I kept every failed run because they are the actual
+content of this session: a DevSecOps pipeline is a set of gates, and gates are only worth
+anything if they close. Each row links to the run and to the fix that followed it.
+
+| # | Run | Commit | Stage that failed | Root cause | Fix |
+|---|---|---|---|---|---|
+| 1 | [37715592993](https://github.com/om-malviya/devops-heros/actions/runs/37715592993) | f7d0ed7 | 3 SAST, 4 SCA, 5 Secret Scan | **Bandit** `-f sarif` is not available without the `sarif` extra. **Gitleaks** scanned the whole push and found Session 12's intentionally committed demo Secret (`kubernetes-secret-yaml`, `generic-api-key`). **SCA** could not resolve `aquasecurity/trivy-action@0.28.0` (tags carry a `v` prefix). | `pip install 'bandit[sarif]'`; the demo Secret allow-listed in `security/gitleaks.toml` by exact path with a written justification (it is course material with fake values, documented in Session 12); action reference corrected. |
+| 2 | [37716305390](https://github.com/om-malviya/devops-heros/actions/runs/37716305390) | 78e2c3a | 4 SCA (set-up) | `trivy-action@v0.28.0` internally uses `setup-trivy@v0.2.1`, a tag that no longer exists. | Pinned `trivy-action@v0.33.1`, which references `setup-trivy` by commit SHA. |
+| 3 | [37716517573](https://github.com/om-malviya/devops-heros/actions/runs/37716517573) | 8e43beb | 4 SCA (Trivy install) | The action's default Trivy release `v0.65.0` has been deleted upstream (404). | `trivy-action@v0.36.0` with an explicit `version: v0.75.0`. |
+| 4 | [37716788809](https://github.com/om-malviya/devops-heros/actions/runs/37716788809) | 401520e | 4 SCA (Trivy fs) | `FATAL ignore file not found: security/.trivyignore` – `ignorefile:` in `trivy.yaml` was relative to the project folder, but composite actions run from the repository root. | Ignore file passed through the action's `trivyignores:` input; the config no longer hard-codes a relative path. |
+| 5 | [37717126323](https://github.com/om-malviya/devops-heros/actions/runs/37717126323) | 276994f | 7 Image Scan (gate) | The gate step used `format: sarif`; with SARIF the action disables the severity filter so the Security tab gets every finding, and `exit-code: 1` then fired on **5 MEDIUM** CVEs in the pip 25.0.1 bundled with `python:3.12-slim` (CVE-2025-8869, CVE-2026-13346, CVE-2026-3219, CVE-2026-6357, CVE-2026-8643). | Gate and report split: the gate is a `table` scan filtered to CRITICAL/HIGH, the SARIF step is report-only (`exit-code: 0`). pip upgraded in the Dockerfile. |
+| 6 | [37717503027](https://github.com/om-malviya/devops-heros/actions/runs/37717503027) | f0791e3 | 7 Image Scan (gate) | `Total: 4 (HIGH: 4)`: msgpack 1.1.2 (GHSA-6v7p-g79w-8964), setuptools 70.3.0 (CVE-2025-47273), urllib3 2.7.0 (CVE-2026-97687, CVE-2026-97689) – all libraries **vendored inside pip 26**, i.e. the upgrade from run 5 made the image worse. | `python -m pip uninstall -y pip setuptools wheel` after the dependencies are installed. A runtime image never needs a package manager; removing it ends the pip CVE chase for good. |
+| 7 | [37717867775](https://github.com/om-malviya/devops-heros/actions/runs/37717867775) | ae6ba3e | 8 Security Gate | Every scanner reported `success`, then the gate job died: `An error occurred trying to start process '/usr/bin/bash' with working directory '.../homework/session17-devsecops'. No such file or directory` – the job has no checkout step, so the workflow-level `working-directory` default does not exist there. | The gate step runs with `working-directory: ${{ github.workspace }}`. |
+| 8 | [37718221051](https://github.com/om-malviya/devops-heros/actions/runs/37718221051) | 49fff6d | – | – | green: image pushed, deploy simulated |
+
+What I take away from this: the two application-level findings (Bandit/Semgrep locally, the
+NaN-injection fix in section 3) were cheap; the expensive lessons were about the *supply chain
+of the pipeline itself* – third-party actions must be pinned to something immutable, a
+scanner's output format can silently change its blocking behaviour, and "upgrade the
+vulnerable package" is not automatically an improvement. None of the eight runs weakened a
+gate: `security/.trivyignore` is still empty.
 
 Failure scenario (for example `eval()` added to `app/main.py`): `3. SAST` ✗, jobs 6, 7
 skipped, `8. Security Gate` ✗ with the table showing `sast | failure`, jobs 9 and 10 skipped –
-nothing is pushed.
+nothing is pushed. Runs 1–7 above are the real-world version of that table.
 
 ## Screenshots
 
-To capture from the GitHub UI after pushing the fork; the captured terminal blocks above are
-the stand-ins until then.
+The captured terminal blocks stand in for screenshots; rows 1–6 and 9 are backed by the real
+runs in section 5 (green run 37718221051 and the seven failed runs before it).
 
 | # | Screenshot | Must show | Stand-in |
 |---|---|---|---|
-| 1 | Run summary graph | 10 jobs in the Code→Build→…→Deploy order, all green, 6 artifacts | section 5 |
+| 1 | Run summary graph | 10 jobs in the Code→Build→…→Deploy order, all green, 7 artifacts | section 5 (run 37718221051) |
 | 2 | `3. SAST` log | Bandit "No issues identified" and Semgrep "0 findings" | captured Bandit/Semgrep output in section 3 |
 | 3 | `4. SCA` log | pip-audit "No known vulnerabilities found" and the Trivy fs table | captured pip-audit output |
 | 4 | `5. Secret Scan` log | Gitleaks "no leaks found" with commit count | captured Gitleaks output (plus the planted-leak demo) in section 3 |
 | 5 | `7. Image Scan` log | Trivy table with `0` vulnerabilities | captured Trivy image scan (before/after the config fix) in section 3 |
-| 6 | `8. Security Gate` job summary | the results table, all `success` | – |
+| 6 | `8. Security Gate` job summary | the results table, all `success` | section 5 ("Security gate PASSED") and run 7 for the failing variant |
 | 7 | Security → Code scanning | alerts page (empty) with Semgrep and Trivy categories | – |
 | 8 | Profile → Packages | `session17-devsecops-api` with `:<sha>` and `:latest` | – |
-| 9 | A failing run | red SAST job, gate failed, push/deploy skipped | the "before the fix" Semgrep output |
+| 9 | A failing run | red SAST job, gate failed, push/deploy skipped | runs 1–7 in the section 5 history table (SAST, SCA, image-scan and gate failures, push/deploy skipped every time) |
 | 10 | `kubectl get pods` after manual apply | two `Running` pods | captured kubectl output in section 3 |
 
 ## Deliverables

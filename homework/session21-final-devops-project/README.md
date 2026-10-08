@@ -595,17 +595,20 @@ Artifacts: pytest-report, frontend-dist, gitleaks-results.sarif · Security tab:
 #### What it took to get there – the CI run history
 
 The pipeline is only useful if it is allowed to fail, and it did. Four pushes were needed before
-the run above went green; each failure was a real gate doing its job or a real infrastructure
+the run above went green, and a later hardening change (removing pip from the image) took two more; each failure was a real gate doing its job or a real infrastructure
 problem, and each fix is in the git history of this folder:
 
 | Run | Commit | Result | What failed | Fix |
 |---|---|---|---|---|
 | [#37715592886](https://github.com/om-malviya/devops-heros/actions/runs/37715592886) | f7d0ed7 (first push) | ✗ | **Semgrep**: `python.fastapi.security.wildcard-cors` – `allow_origins=["*"]` in `app/main.py`. **Gitleaks**: 9 hits – Grafana/Argo CD lab passwords quoted in captured README output and the Session 12 demo Secret. **npm audit**: `vite <=6.4.2` / `esbuild <=0.24.2` (1 high, 1 moderate). | CORS origins moved to the `CORS_ORIGINS` setting (ConfigMap/Helm/Compose) with a regression test; passwords redacted from the READMEs; Session 12's demo Secret allow-listed by exact path with a justification; Vite 5 → 7 and `@vitejs/plugin-react` 4 → 5 (`npm audit`: 0). |
 | [#37716305366](https://github.com/om-malviya/devops-heros/actions/runs/37716305366) | 78e2c3a | ✗ | All five scanners green. `aquasecurity/trivy-action@0.30.0` could not be resolved: its internal `setup-trivy@v0.2.2` tag no longer exists. | Action pinned to `v0.33.1`, which references `setup-trivy` by commit SHA. |
-| [#37716517494](https://github.com/om-malviya/devops-heros/actions/runs/37716517494) | 3f664e5 | ✗ | Trivy install step exited 1: the action's default Trivy release `v0.65.0` has been deleted upstream (GitHub returns 404 for the tag). | `trivy-action@v0.36.0` with an explicit `version: v0.75.0` (the same release used for the local scans). |
-| [#37716788780](https://github.com/om-malviya/devops-heros/actions/runs/37716788780) | 401520e | ✓ | – | – |
+| [#37716517494](https://github.com/om-malviya/devops-heros/actions/runs/37716517494) | 8e43beb | ✗ | Trivy install step exited 1: the action's default Trivy release `v0.65.0` has been deleted upstream (GitHub returns 404 for the tag). | `trivy-action@v0.36.0` with an explicit `version: v0.75.0` (the same release used for the local scans). |
+| [#37716788780](https://github.com/om-malviya/devops-heros/actions/runs/37716788780) | 401520e | ✓ | – | first green run; both images pushed to GHCR |
+| [#37717502998](https://github.com/om-malviya/devops-heros/actions/runs/37717502998) | f0791e3 | ✗ | **Trivy gate (backend image)**: `Total: 4 (HIGH: 4)` – msgpack 1.1.2 (GHSA-6v7p-g79w-8964), setuptools 70.3.0 (CVE-2025-47273), urllib3 2.7.0 (CVE-2026-97687/97689). All of them are libraries *vendored inside pip 26*, which this commit had just upgraded to get rid of five MEDIUM CVEs in the bundled pip 25.0.1. | `python -m pip uninstall -y pip setuptools wheel` at the end of the backend Dockerfile: a runtime image does not need a package manager, so removing it is both the smaller attack surface and the end of the pip CVE chase. |
+| [#37717867782](https://github.com/om-malviya/devops-heros/actions/runs/37717867782) | ae6ba3e | ✓ | – | current state: backend (debian 13.7) and frontend (alpine 3.24.2) both `Vulnerabilities 0`; pushed `taskboard-backend:ae6ba3e4…` (sha256:b33a9392…) and `taskboard-frontend:ae6ba3e4…` (sha256:c086ae96…) plus `:latest` |
 
-I observed two lessons here that the local runs could not teach: third-party actions must be
+I observed three lessons here that the local runs could not teach: "upgrade the vulnerable package" is
+not always the answer (newer pip shipped worse vendored CVEs, so the fix was to not ship pip at all); third-party actions must be
 pinned to something immutable (a commit SHA or an explicit tool version), because tags and
 releases disappear; and a repo-wide secret scanner will find the demo credentials that earlier
 sessions deliberately committed, so every exception has to be written down next to the rule.
